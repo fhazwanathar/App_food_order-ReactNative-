@@ -1,12 +1,11 @@
 // src/screens/InvoiceScreen.js
-import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
+import {
+  Alert,
   ScrollView,
+  StyleSheet,
+  Text,
   TouchableOpacity,
-  Alert 
+  View
 } from 'react-native';
 
 const InvoiceScreen = ({ navigation, route }) => {
@@ -19,7 +18,7 @@ const InvoiceScreen = ({ navigation, route }) => {
       [
         {
           text: 'Lihat Riwayat',
-          onPress: () => navigation.navigate('History')
+          onPress: () => navigation.navigate('Order')
         },
         {
           text: 'Kembali ke Home',

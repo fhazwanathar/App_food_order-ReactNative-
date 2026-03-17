@@ -331,6 +331,9 @@ const ProfileScreen = () => {
           <TouchableOpacity onPress={() => Linking.openURL('https://discord.com/channels/@zxyninety')}>
             <Text style={styles.linkItem}>💬 Discord</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => Linking.openURL('https://github.com/siswayangtidakmencolok-afk')}>
+            <Text style={styles.linkItem}>👨🏼‍💻 Github</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => Linking.openURL('https://t.me/Art_zwn')}>
             <Text style={styles.linkItem}>✈️ Telegram</Text>
           </TouchableOpacity>
@@ -359,10 +362,10 @@ const ProfileScreen = () => {
       {/* App Info */}
       <View style={styles.appInfo}>
         <Text style={[styles.appInfoText, { color: theme.textSecondary }]}>
-          FoodApp v1.0.0
+          FoodApp version 1.0.0
         </Text>
         <Text style={[styles.appInfoText, { color: theme.textSecondary }]}>
-          Made with ❤️ for learning
+          Creator Fhaz for learning and study
         </Text>
       </View>
 
