@@ -1,11 +1,13 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 
+import { supabase } from './src/config/supabase';
 import { darkTheme, lightTheme } from './src/config/theme';
 import { AppProvider, useApp } from './src/context/AppContext';
+import AuthScreen from './src/screens/AuthScreen';
 import CartScreen from './src/screens/CartScreen';
 import DeliveryTrackerScreen from './src/screens/DeliveryTrackerScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -21,18 +23,15 @@ import SplashScreen from './src/screens/SplashScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Transition: slide dari kanan + fade
 const slideFromRight = {
   cardStyleInterpolator: ({ current, layouts }) => ({
     cardStyle: {
-      transform: [
-        {
-          translateX: current.progress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [layouts.screen.width, 0],
-          }),
-        },
-      ],
+      transform: [{
+        translateX: current.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [layouts.screen.width, 0],
+        }),
+      }],
       opacity: current.progress.interpolate({
         inputRange: [0, 0.5, 1],
         outputRange: [0, 0.8, 1],
@@ -41,18 +40,15 @@ const slideFromRight = {
   }),
 };
 
-// Transition: scale + fade (untuk modal-like screens)
 const scaleFromCenter = {
   cardStyleInterpolator: ({ current }) => ({
     cardStyle: {
-      transform: [
-        {
-          scale: current.progress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.85, 1],
-          }),
-        },
-      ],
+      transform: [{
+        scale: current.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0.85, 1],
+        }),
+      }],
       opacity: current.progress.interpolate({
         inputRange: [0, 1],
         outputRange: [0, 1],
@@ -71,20 +67,9 @@ function MenuStack() {
   const { isDarkMode } = useApp();
   const theme = isDarkMode ? darkTheme : lightTheme;
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: theme.primary },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-        ...slideFromRight,
-      }}
-    >
+    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: theme.primary }, headerTintColor: '#fff', headerTitleStyle: { fontWeight: 'bold' }, ...slideFromRight }}>
       <Stack.Screen name="MenuMain" component={MenuScreen} options={{ title: 'Menu' }} />
-      <Stack.Screen
-        name="MenuDetail"
-        component={MenuDetailScreen}
-        options={{ title: 'Detail Menu', ...scaleFromCenter }}
-      />
+      <Stack.Screen name="MenuDetail" component={MenuDetailScreen} options={{ title: 'Detail Menu', ...scaleFromCenter }} />
     </Stack.Navigator>
   );
 }
@@ -93,26 +78,11 @@ function CartStack() {
   const { isDarkMode } = useApp();
   const theme = isDarkMode ? darkTheme : lightTheme;
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: theme.primary },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-        ...slideFromRight,
-      }}
-    >
+    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: theme.primary }, headerTintColor: '#fff', headerTitleStyle: { fontWeight: 'bold' }, ...slideFromRight }}>
       <Stack.Screen name="CartMain" component={CartScreen} options={{ title: 'Keranjang' }} />
       <Stack.Screen name="Payment" component={PaymentScreen} options={{ title: 'Pembayaran' }} />
-      <Stack.Screen
-        name="Invoice"
-        component={InvoiceScreen}
-        options={{ title: 'Invoice', headerLeft: null, ...scaleFromCenter }}
-      />
-      <Stack.Screen
-        name="DeliveryTracker"
-        component={DeliveryTrackerScreen}
-        options={{ title: '🛵 Lacak Pesanan', ...slideFromRight }}
-      />
+      <Stack.Screen name="Invoice" component={InvoiceScreen} options={{ title: 'Invoice', headerLeft: null, ...scaleFromCenter }} />
+      <Stack.Screen name="DeliveryTracker" component={DeliveryTrackerScreen} options={{ title: '🛵 Lacak Pesanan', ...slideFromRight }} />
     </Stack.Navigator>
   );
 }
@@ -128,13 +98,7 @@ function MainTabs() {
       screenOptions={{
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.textSecondary,
-        tabBarStyle: {
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-          backgroundColor: theme.card,
-          borderTopColor: theme.border,
-        },
+        tabBarStyle: { height: 60, paddingBottom: 8, paddingTop: 8, backgroundColor: theme.card, borderTopColor: theme.border },
         headerStyle: { backgroundColor: theme.primary },
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: 'bold' },
@@ -150,11 +114,28 @@ function MainTabs() {
 }
 
 function AppContent() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash]         = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [session, setSession]               = useState(null);
+  const [authLoading, setAuthLoading]       = useState(true);
 
-  if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => setSession(session)
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (showSplash)     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   if (showOnboarding) return <OnboardingScreen onFinish={() => setShowOnboarding(false)} />;
+  if (authLoading)    return <SplashScreen onFinish={() => {}} />;
+  if (!session)       return <AuthScreen onAuthSuccess={() => {}} />;
 
   return (
     <NavigationContainer>
