@@ -89,10 +89,10 @@ Pastikan sudah terinstal:
 
 ```bash
 # 1. Clone repository ini
-git clone https://github.com/siswayangtidakmencolok-afk/AplikasiPemesananMakanan.git
+git clone https://github.com/siswayangtidakmencolok-afk/App_food_order-ReactNative.git
 
 # 2. Masuk ke direktori proyek
-cd AplikasiPemesananMakanan
+cd App_food_order-ReactNative
 
 # 3. Install dependencies
 npm install
