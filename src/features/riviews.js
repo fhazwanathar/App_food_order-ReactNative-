@@ -5,11 +5,11 @@ export async function addReview(menu_item_id, user_id, rating, text, user_name) 
   const { data, error } = await supabase
     .from('reviews')
     .insert([{ menu_item_id, user_id, rating, text, user_name }])
-    .select(); // HAPUS .single()
+    .select();
   if (error) {
-    console.error('Gagal menambah review:', error.message);
+    console.log("Insert error:", error.message);
+    alert("Insert error: " + error.message);
   }
-  // data[0] adalah review terakhir yang ditambahkan
   return { data: data ? data[0] : null, error };
 }
 
