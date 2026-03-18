@@ -148,37 +148,37 @@ useEffect(() => {
 
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
-        <View style={styles.itemsPreview}>
-          <Text style={[styles.itemsCount, { color: theme.textSecondary }]}>
-            {order.items.length} item pesanan
-          </Text>
-          <Text style={[styles.firstItem, { color: theme.text }]} numberOfLines={1}>
-            {order.items[0].name}
-            {order.items.length > 1 && ` +${order.items.length - 1} lainnya`}
-          </Text>
-        </View>
+        {/* Items Preview */}
+<View style={styles.itemsPreview}>
+  <Text style={[styles.itemsCount, { color: theme.textSecondary }]}>
+    {(order.items || []).length} item pesanan
+  </Text>
+  <Text style={[styles.firstItem, { color: theme.text }]} numberOfLines={1}>
+    {order.items && order.items.length > 0
+      ? `${order.items[0].name}${order.items.length > 1 ? ` +${order.items.length - 1} lainnya` : ''}`
+      : 'Detail pesanan'}
+  </Text>
+</View>
 
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+  {/* Tombol Track — selalu muncul */}
+  <TouchableOpacity
+    style={[styles.reorderButton, { backgroundColor: '#2196F3' }]}
+    onPress={() => navigation.navigate('DeliveryTracker', { order })}
+  >
+    <Text style={styles.reorderButtonText}>🛵 Track</Text>
+  </TouchableOpacity>
 
-        <View style={styles.orderFooter}>
-          <View>
-            <Text style={[styles.totalLabel, { color: theme.textSecondary }]}>
-              Total Pembayaran
-            </Text>
-            <Text style={styles.totalValue}>
-              Rp {order.total.toLocaleString('id-ID')}
-            </Text>
-          </View>
-          
-          {order.status === 'Delivered' && (
-            <TouchableOpacity 
-              style={[styles.reorderButton, { backgroundColor: theme.success }]}
-              onPress={() => handleReorder(order)}
-            >
-              <Text style={styles.reorderButtonText}>🔄 Pesan Lagi</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+  {/* Tombol Pesan Lagi — hanya saat Delivered */}
+  {order.status === 'Delivered' && (
+    <TouchableOpacity
+      style={[styles.reorderButton, { backgroundColor: theme.success }]}
+      onPress={() => handleReorder(order)}
+    >
+      <Text style={styles.reorderButtonText}>🔄 Pesan Lagi</Text>
+    </TouchableOpacity>
+  )}
+</View>
       </TouchableOpacity>
     );
   };
@@ -240,15 +240,15 @@ useEffect(() => {
             <Text style={[styles.modalSectionTitle, { color: theme.text }]}>
               Daftar Pesanan
             </Text>
-            {selectedOrder.items.map((item, index) => (
-              <View key={index} style={styles.modalItem}>
-                <Text style={[styles.modalItemName, { color: theme.text }]}>
-                  {item.quantity}x {item.name}
-                </Text>
-                <Text style={[styles.modalItemPrice, { color: theme.textSecondary }]}>
-                  Rp {(item.price * item.quantity).toLocaleString('id-ID')}
-                </Text>
-              </View>
+            {(selectedOrder.items || []).map((item, index) => (
+            <View key={index} style={styles.modalItem}>
+              <Text style={[styles.modalItemName, { color: theme.text }]}>
+                {item.quantity}x {item.name || 'Item'}
+              </Text>
+              <Text style={[styles.modalItemPrice, { color: theme.textSecondary }]}>
+                Rp {((item.price || 0) * (item.quantity || 1)).toLocaleString('id-ID')}
+              </Text>
+            </View>
             ))}
 
             <View style={[styles.divider, { backgroundColor: theme.border, marginVertical: 16 }]} />

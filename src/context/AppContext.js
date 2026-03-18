@@ -99,17 +99,20 @@ export const AppProvider = ({ children }) => {
       .order('created_at', { ascending: false });
     if (!error && data) {
       const formatted = data.map(o => ({
-        ...o,
-        orderNumber: o.order_number,
-        customerName: o.customer_name,
-        phoneNumber: o.phone_number,
-        deliveryAddress: o.delivery_address,
-        orderNotes: o.order_notes,
-        paymentMethod: o.payment_method,
-        estimatedDelivery: o.estimated_delivery,
-        items: o.order_items || [],
-        createdAt: o.created_at,
-      }));
+  ...o,
+  orderNumber: o.order_number,
+  customerName: o.customer_name,
+  phoneNumber: o.phone_number,
+  deliveryAddress: o.delivery_address,
+  orderNotes: o.order_notes,
+  paymentMethod: o.payment_method,
+  estimatedDelivery: o.estimated_delivery,
+  items: (o.order_items || []).map(item => ({  // ← map tiap item
+    ...item,
+    id: item.menu_item_id,
+  })),
+  createdAt: o.created_at,
+}));
       setOrderHistory(formatted);
     }
   };
