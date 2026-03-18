@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
-  FlatList, Image, Modal,
+  Image, Modal,
   ScrollView,
   StyleSheet, Text,
   TextInput, TouchableOpacity, View
@@ -12,126 +12,141 @@ import { darkTheme, lightTheme } from '../config/theme';
 import { useApp } from '../context/AppContext';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = width - 32;
+const COL_GAP   = 10;
+const PADDING    = 14;
+const COL_WIDTH  = (width - PADDING * 2 - COL_GAP) / 2;
 
 // ─── Float Particle ──────────────────────────────────────────
-const FloatParticle = ({ emoji, onDone }) => {
+const FloatParticle = ({ onDone }) => {
   const translateY = useRef(new Animated.Value(0)).current;
   const opacity    = useRef(new Animated.Value(1)).current;
-  const scale      = useRef(new Animated.Value(1)).current;
+  const scale      = useRef(new Animated.Value(0.5)).current;
 
   useState(() => {
     Animated.parallel([
-      Animated.timing(translateY, { toValue: -140, duration: 800, useNativeDriver: false }),
-      Animated.timing(opacity,    { toValue: 0,    duration: 800, useNativeDriver: false }),
-      Animated.sequence([
-        Animated.spring(scale, { toValue: 1.6, friction: 3, useNativeDriver: false }),
-        Animated.timing(scale,  { toValue: 0.4, duration: 300, useNativeDriver: false }),
-      ]),
+      Animated.timing(translateY, { toValue: -160, duration: 900, useNativeDriver: false }),
+      Animated.timing(opacity,    { toValue: 0,    duration: 900, useNativeDriver: false }),
+      Animated.spring(scale,      { toValue: 1.8,  friction: 3,   useNativeDriver: false }),
     ]).start(() => onDone());
   });
 
   return (
     <Animated.Text style={{
-      position: 'absolute', bottom: 60, right: 20,
-      fontSize: 30, zIndex: 999,
+      position: 'absolute', bottom: 80, right: 24,
+      fontSize: 28, zIndex: 999,
       transform: [{ translateY }, { scale }],
       opacity, pointerEvents: 'none',
-    }}>
-      {emoji}
-    </Animated.Text>
+    }}>🛒</Animated.Text>
   );
 };
 
-// ─── Add Button ───────────────────────────────────────────────
-const AddButton = ({ onPress, theme }) => {
-  const scale = useRef(new Animated.Value(1)).current;
-
-  const handlePress = () => {
-    Animated.sequence([
-      Animated.spring(scale, { toValue: 0.8, friction: 3, useNativeDriver: false }),
-      Animated.spring(scale, { toValue: 1.1, friction: 3, useNativeDriver: false }),
-      Animated.spring(scale, { toValue: 1,   friction: 4, useNativeDriver: false }),
-    ]).start();
-    onPress();
-  };
-
-  return (
-    <Animated.View style={{ transform: [{ scale }] }}>
-      <TouchableOpacity style={[styles.addBtn, { backgroundColor: theme.primary }]} onPress={handlePress} activeOpacity={0.85}>
-        <Text style={styles.addBtnText}>+ Tambah</Text>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
-
-// ─── Food Card ────────────────────────────────────────────────
-const FoodCard = ({ item, theme, onAddToCart, onToggleFavorite, onPress, isFavorite }) => {
+// ─── Pin Card (Pinterest style) ───────────────────────────────
+const PinCard = ({ item, theme, onAddToCart, onToggleFavorite, onPress, isFavorite, tall }) => {
   const heartScale = useRef(new Animated.Value(1)).current;
   const cardScale  = useRef(new Animated.Value(1)).current;
+  const imgHeight  = tall ? 240 : 160;
 
-  const handleFavorite = () => {
+  const handleFavorite = (e) => {
+    e.stopPropagation?.();
     Animated.sequence([
-      Animated.spring(heartScale, { toValue: 1.6, friction: 3, useNativeDriver: false }),
+      Animated.spring(heartScale, { toValue: 1.7, friction: 3, useNativeDriver: false }),
       Animated.spring(heartScale, { toValue: 1,   friction: 4, useNativeDriver: false }),
     ]).start();
     onToggleFavorite(item.id);
   };
 
-  const handlePressIn  = () => Animated.spring(cardScale, { toValue: 0.97, friction: 6, useNativeDriver: false }).start();
+  const handlePressIn  = () => Animated.spring(cardScale, { toValue: 0.96, friction: 6, useNativeDriver: false }).start();
   const handlePressOut = () => Animated.spring(cardScale, { toValue: 1,    friction: 4, useNativeDriver: false }).start();
 
-  const stars = Math.floor(item.rating || 0);
-
   return (
-    <Animated.View style={[styles.card, { backgroundColor: theme.card, transform: [{ scale: cardScale }] }]}>
-      {/* Image */}
+    <Animated.View style={[styles.pin, { backgroundColor: theme.card, transform: [{ scale: cardScale }] }]}>
       <TouchableOpacity onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut} activeOpacity={1}>
-        <View style={styles.imageWrapper}>
-          <Image source={{ uri: item.image }} style={styles.cardImage} />
-          {/* Gradient overlay */}
-          <View style={styles.imageOverlay} />
+        {/* Image */}
+        <View style={[styles.pinImgWrap, { height: imgHeight }]}>
+          <Image source={{ uri: item.image }} style={styles.pinImg} />
 
-          {/* Category pill */}
-          <View style={[styles.categoryPill, { backgroundColor: theme.primary }]}>
-            <Text style={styles.categoryPillText}>{item.category}</Text>
+          {/* Dark scrim bottom */}
+          <View style={styles.pinScrim} />
+
+          {/* Category */}
+          <View style={[styles.pinCat, { backgroundColor: theme.primary }]}>
+            <Text style={styles.pinCatTxt}>
+              {item.category === 'Minuman' ? '🥤' : '🍽️'} {item.category}
+            </Text>
           </View>
 
-          {/* Favorite button */}
-          <Animated.View style={[styles.heartBtn, { transform: [{ scale: heartScale }] }]}>
+          {/* Heart */}
+          <Animated.View style={[styles.pinHeart, { transform: [{ scale: heartScale }] }]}>
             <TouchableOpacity onPress={handleFavorite} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={{ fontSize: 22 }}>{isFavorite ? '❤️' : '🤍'}</Text>
+              <Text style={{ fontSize: 20 }}>{isFavorite ? '❤️' : '🤍'}</Text>
             </TouchableOpacity>
           </Animated.View>
 
-          {/* Rating badge */}
-          <View style={styles.ratingBadge}>
-            <Text style={styles.ratingBadgeText}>⭐ {item.rating}</Text>
+          {/* Rating */}
+          <View style={styles.pinRating}>
+            <Text style={styles.pinRatingTxt}>⭐ {item.rating}</Text>
+          </View>
+        </View>
+
+        {/* Body */}
+        <View style={styles.pinBody}>
+          <Text style={[styles.pinName, { color: theme.text }]} numberOfLines={2}>{item.name}</Text>
+          <Text style={[styles.pinDesc, { color: theme.textSecondary }]} numberOfLines={2}>{item.description}</Text>
+          <View style={styles.pinFooter}>
+            <Text style={styles.pinPrice}>Rp {(item.price || 0).toLocaleString('id-ID')}</Text>
+            <TouchableOpacity
+              style={[styles.pinAddBtn, { backgroundColor: theme.primary }]}
+              onPress={(e) => { e.stopPropagation?.(); onAddToCart(item); }}
+            >
+              <Text style={styles.pinAddTxt}>+</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>
-
-      {/* Info */}
-      <View style={styles.cardBody}>
-        <View style={styles.cardTopRow}>
-          <Text style={[styles.cardName, { color: theme.text }]} numberOfLines={1}>{item.name}</Text>
-          <Text style={styles.cardPrice}>Rp {(item.price || 0).toLocaleString('id-ID')}</Text>
-        </View>
-
-        <Text style={[styles.cardDesc, { color: theme.textSecondary }]} numberOfLines={2}>
-          {item.description}
-        </Text>
-
-        <View style={styles.cardFooter}>
-          <View style={styles.reviewsRow}>
-            <Text style={{ fontSize: 11, color: theme.textSecondary }}>
-              {'⭐'.repeat(Math.min(stars, 5))} {item.total_reviews} ulasan
-            </Text>
-          </View>
-          <AddButton onPress={() => onAddToCart(item)} theme={theme} />
-        </View>
-      </View>
     </Animated.View>
+  );
+};
+
+// ─── Masonry Grid ─────────────────────────────────────────────
+const MasonryGrid = ({ data, theme, onAddToCart, onToggleFavorite, onPress, favorites }) => {
+  // Split into 2 columns
+  const left  = data.filter((_, i) => i % 2 === 0);
+  const right = data.filter((_, i) => i % 2 !== 0);
+
+  return (
+    <View style={styles.grid}>
+      {/* Left column */}
+      <View style={styles.col}>
+        {left.map((item, i) => (
+          <PinCard
+            key={item.id}
+            item={item}
+            theme={theme}
+            tall={i % 3 === 0}
+            isFavorite={favorites.includes(item.id)}
+            onAddToCart={onAddToCart}
+            onToggleFavorite={onToggleFavorite}
+            onPress={() => onPress(item)}
+          />
+        ))}
+      </View>
+
+      {/* Right column — offset start untuk masonry feel */}
+      <View style={[styles.col, { marginTop: 24 }]}>
+        {right.map((item, i) => (
+          <PinCard
+            key={item.id}
+            item={item}
+            theme={theme}
+            tall={i % 3 === 1}
+            isFavorite={favorites.includes(item.id)}
+            onAddToCart={onAddToCart}
+            onToggleFavorite={onToggleFavorite}
+            onPress={() => onPress(item)}
+          />
+        ))}
+      </View>
+    </View>
   );
 };
 
@@ -140,14 +155,13 @@ const MenuScreen = ({ navigation }) => {
   const { addToCart, favorites, toggleFavorite, isDarkMode, menuItems, menuLoading } = useApp();
   const theme = isDarkMode ? darkTheme : lightTheme;
 
-  const [selectedCategory, setSelectedCategory]       = useState('Semua');
-  const [searchQuery, setSearchQuery]                 = useState('');
-  const [sortBy, setSortBy]                           = useState('name-asc');
-  const [showFavoritesOnly, setShowFavoritesOnly]     = useState(false);
-  const [priceRange]                                  = useState({ min: 0, max: 100000 });
-  const [showFilterModal, setShowFilterModal]         = useState(false);
-  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-  const [particles, setParticles]                     = useState([]);
+  const [selectedCategory, setSelectedCategory]           = useState('Semua');
+  const [searchQuery, setSearchQuery]                     = useState('');
+  const [sortBy, setSortBy]                               = useState('name-asc');
+  const [showFavoritesOnly, setShowFavoritesOnly]         = useState(false);
+  const [showFilterModal, setShowFilterModal]             = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation]   = useState(false);
+  const [particles, setParticles]                         = useState([]);
   const successScale = useRef(new Animated.Value(0)).current;
 
   const triggerSuccess = () => {
@@ -161,18 +175,17 @@ const MenuScreen = ({ navigation }) => {
 
   const handleAddToCart = (item) => {
     addToCart(item);
-    const id = Date.now();
-    setParticles(prev => [...prev, { id, emoji: '🛒' }]);
+    setParticles(prev => [...prev, { id: Date.now() }]);
     triggerSuccess();
   };
 
   const categories  = ['Semua', 'Makanan Utama', 'Minuman'];
   const sortOptions = [
-    { value: 'name-asc',    label: 'Nama A-Z' },
-    { value: 'name-desc',   label: 'Nama Z-A' },
-    { value: 'price-asc',   label: 'Termurah' },
-    { value: 'price-desc',  label: 'Termahal' },
-    { value: 'rating-desc', label: 'Rating Tertinggi' },
+    { value: 'name-asc',    label: '🔤 Nama A-Z' },
+    { value: 'name-desc',   label: '🔤 Nama Z-A' },
+    { value: 'price-asc',   label: '💸 Termurah' },
+    { value: 'price-desc',  label: '💎 Termahal' },
+    { value: 'rating-desc', label: '⭐ Rating Tertinggi' },
   ];
 
   const filteredMenu = useMemo(() => {
@@ -183,7 +196,6 @@ const MenuScreen = ({ navigation }) => {
       i.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
     if (showFavoritesOnly) result = result.filter(i => favorites.includes(i.id));
-    result = result.filter(i => (i.price || 0) >= priceRange.min && (i.price || 0) <= priceRange.max);
     switch (sortBy) {
       case 'name-asc':    result.sort((a, b) => a.name?.localeCompare(b.name)); break;
       case 'name-desc':   result.sort((a, b) => b.name?.localeCompare(a.name)); break;
@@ -192,113 +204,107 @@ const MenuScreen = ({ navigation }) => {
       case 'rating-desc': result.sort((a, b) => b.rating - a.rating); break;
     }
     return result;
-  }, [selectedCategory, searchQuery, sortBy, showFavoritesOnly, priceRange, favorites, menuItems]);
+  }, [selectedCategory, searchQuery, sortBy, showFavoritesOnly, favorites, menuItems]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <ScrollView showsVerticalScrollIndicator={false} stickyHeaderIndices={[0]}>
 
-      {/* ── Search Bar ── */}
-      <View style={[styles.searchBar, { backgroundColor: theme.card }]}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
-          placeholder="Cari makanan atau minuman..."
-          placeholderTextColor={theme.textSecondary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Text style={{ fontSize: 18, color: theme.textSecondary, paddingHorizontal: 8 }}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* ── Category + Filter Row ── */}
-      <View style={[styles.controlRow, { backgroundColor: theme.background }]}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
-          {categories.map(cat => (
-            <TouchableOpacity
-              key={cat}
-              style={[styles.catChip, selectedCategory === cat && { backgroundColor: theme.primary }]}
-              onPress={() => setSelectedCategory(cat)}
-            >
-              <Text style={[styles.catChipText, selectedCategory === cat && { color: '#fff' }]}>{cat}</Text>
-            </TouchableOpacity>
-          ))}
-
-          {/* Fav toggle */}
-          <TouchableOpacity
-            style={[styles.catChip, showFavoritesOnly && { backgroundColor: '#e74c3c' }]}
-            onPress={() => setShowFavoritesOnly(!showFavoritesOnly)}
-          >
-            <Text style={[styles.catChipText, showFavoritesOnly && { color: '#fff' }]}>❤️ Favorit</Text>
-          </TouchableOpacity>
-        </ScrollView>
-
-        {/* Filter button */}
-        <TouchableOpacity style={[styles.filterBtn, { backgroundColor: theme.card }]} onPress={() => setShowFilterModal(true)}>
-          <Text style={{ fontSize: 18 }}>⚙️</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* ── Result count ── */}
-      <View style={{ paddingHorizontal: 16, paddingBottom: 4 }}>
-        <Text style={{ fontSize: 12, color: theme.textSecondary, fontStyle: 'italic' }}>
-          {menuLoading ? 'Memuat menu...' : `${filteredMenu.length} menu tersedia`}
-        </Text>
-      </View>
-
-      {/* ── List ── */}
-      {menuLoading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={{ fontSize: 48 }}>🍔</Text>
-          <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Memuat menu...</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filteredMenu}
-          keyExtractor={item => item.id?.toString()}
-          renderItem={({ item }) => (
-            <FoodCard
-              item={item}
-              theme={theme}
-              isFavorite={favorites.includes(item.id)}
-              onAddToCart={handleAddToCart}
-              onToggleFavorite={toggleFavorite}
-              onPress={() => navigation.navigate('MenuDetail', { item })}
+        {/* ── Sticky Header ── */}
+        <View style={[styles.header, { backgroundColor: theme.background }]}>
+          {/* Search */}
+          <View style={[styles.searchBar, { backgroundColor: theme.card }]}>
+            <Text style={{ fontSize: 16, marginRight: 8 }}>🔍</Text>
+            <TextInput
+              style={[styles.searchInput, { color: theme.text }]}
+              placeholder="Cari makanan favoritmu..."
+              placeholderTextColor={theme.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
-          )}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <Text style={{ fontSize: 64, marginBottom: 16 }}>🍽️</Text>
-              <Text style={[styles.emptyText, { color: theme.text }]}>Menu tidak ditemukan</Text>
-              <Text style={{ color: theme.textSecondary, fontSize: 14, textAlign: 'center' }}>
-                Coba kata kunci lain atau ganti filter
-              </Text>
-            </View>
-          )}
-        />
-      )}
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Text style={{ color: theme.textSecondary, fontSize: 18, paddingLeft: 8 }}>✕</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Category chips + filter */}
+          <View style={styles.chipRow}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
+              {categories.map(cat => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[styles.chip, { backgroundColor: theme.card }, selectedCategory === cat && { backgroundColor: theme.primary }]}
+                  onPress={() => setSelectedCategory(cat)}
+                >
+                  <Text style={[styles.chipTxt, { color: theme.textSecondary }, selectedCategory === cat && { color: '#fff' }]}>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={[styles.chip, { backgroundColor: theme.card }, showFavoritesOnly && { backgroundColor: '#e74c3c' }]}
+                onPress={() => setShowFavoritesOnly(f => !f)}
+              >
+                <Text style={[styles.chipTxt, { color: theme.textSecondary }, showFavoritesOnly && { color: '#fff' }]}>
+                  ❤️ Favorit
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <TouchableOpacity style={[styles.filterBtn, { backgroundColor: theme.card }]} onPress={() => setShowFilterModal(true)}>
+              <Text style={{ fontSize: 18 }}>⚙️</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Count */}
+          <Text style={[styles.countTxt, { color: theme.textSecondary }]}>
+            {menuLoading ? 'Memuat...' : `${filteredMenu.length} menu`}
+          </Text>
+        </View>
+
+        {/* ── Content ── */}
+        {menuLoading ? (
+          <View style={styles.loadingBox}>
+            <Text style={{ fontSize: 56 }}>🍔</Text>
+            <Text style={{ color: theme.textSecondary, marginTop: 12, fontSize: 15 }}>Memuat menu...</Text>
+          </View>
+        ) : filteredMenu.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={{ fontSize: 56 }}>🍽️</Text>
+            <Text style={[styles.emptyTxt, { color: theme.text }]}>Tidak ada menu</Text>
+          </View>
+        ) : (
+          <MasonryGrid
+            data={filteredMenu}
+            theme={theme}
+            favorites={favorites}
+            onAddToCart={handleAddToCart}
+            onToggleFavorite={toggleFavorite}
+            onPress={(item) => navigation.navigate('MenuDetail', { item })}
+          />
+        )}
+
+        <View style={{ height: 40 }} />
+      </ScrollView>
 
       {/* ── Filter Modal ── */}
       <Modal visible={showFilterModal} transparent animationType="slide" onRequestClose={() => setShowFilterModal(false)}>
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowFilterModal(false)}>
+        <TouchableOpacity style={styles.modalBg} activeOpacity={1} onPress={() => setShowFilterModal(false)}>
           <View style={[styles.modalSheet, { backgroundColor: theme.card }]}>
-            <View style={styles.modalHandle} />
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Urutkan Menu</Text>
+            <View style={styles.sheetHandle} />
+            <Text style={[styles.sheetTitle, { color: theme.text }]}>Urutkan Menu</Text>
             {sortOptions.map(opt => (
               <TouchableOpacity
                 key={opt.value}
-                style={[styles.sortRow, sortBy === opt.value && { backgroundColor: theme.primary + '22' }]}
+                style={[styles.sortRow, sortBy === opt.value && { backgroundColor: theme.primary + '18' }]}
                 onPress={() => { setSortBy(opt.value); setShowFilterModal(false); }}
               >
-                <Text style={[styles.sortRowText, { color: theme.text }, sortBy === opt.value && { color: theme.primary, fontWeight: 'bold' }]}>
+                <Text style={[styles.sortTxt, { color: theme.text }, sortBy === opt.value && { color: theme.primary, fontWeight: 'bold' }]}>
                   {opt.label}
                 </Text>
-                {sortBy === opt.value && <Text style={{ color: theme.primary }}>✓</Text>}
+                {sortBy === opt.value && <Text style={{ color: theme.primary, fontSize: 18 }}>✓</Text>}
               </TouchableOpacity>
             ))}
           </View>
@@ -307,15 +313,15 @@ const MenuScreen = ({ navigation }) => {
 
       {/* ── Particles ── */}
       {particles.map(p => (
-        <FloatParticle key={p.id} emoji={p.emoji} onDone={() => setParticles(prev => prev.filter(x => x.id !== p.id))} />
+        <FloatParticle key={p.id} onDone={() => setParticles(prev => prev.filter(x => x.id !== p.id))} />
       ))}
 
-      {/* ── Success Overlay ── */}
+      {/* ── Success ── */}
       {showSuccessAnimation && (
         <View style={styles.successOverlay}>
           <Animated.View style={[styles.successCard, { transform: [{ scale: successScale }] }]}>
-            <SuccessAnimation style={{ width: 100, height: 100 }} />
-            <Text style={styles.successText}>Ditambahkan! 🎉</Text>
+            <SuccessAnimation style={{ width: 90, height: 90 }} />
+            <Text style={styles.successTxt}>Ditambahkan! 🎉</Text>
           </Animated.View>
         </View>
       )}
@@ -324,62 +330,57 @@ const MenuScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container:        { flex: 1 },
+  container:      { flex: 1 },
 
-  // Search
-  searchBar:        { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginVertical: 10, borderRadius: 16, paddingHorizontal: 14, paddingVertical: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 },
-  searchIcon:       { fontSize: 18, marginRight: 8 },
-  searchInput:      { flex: 1, fontSize: 14, paddingVertical: 0 },
+  // Header
+  header:         { paddingTop: 8, paddingBottom: 4, paddingHorizontal: PADDING, zIndex: 10 },
+  searchBar:      { flexDirection: 'row', alignItems: 'center', borderRadius: 16, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 3 },
+  searchInput:    { flex: 1, fontSize: 14 },
+  chipRow:        { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  chip:           { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, marginRight: 8 },
+  chipTxt:        { fontSize: 13, fontWeight: '600' },
+  filterBtn:      { width: 38, height: 38, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginLeft: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3, elevation: 2 },
+  countTxt:       { fontSize: 12, fontStyle: 'italic', marginBottom: 8, marginLeft: 2 },
 
-  // Controls
-  controlRow:       { flexDirection: 'row', alignItems: 'center', paddingLeft: 16, paddingRight: 8, marginBottom: 8 },
-  catChip:          { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginRight: 8, backgroundColor: '#f0f0f0' },
-  catChipText:      { fontSize: 13, fontWeight: '600', color: '#666' },
-  filterBtn:        { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginLeft: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
+  // Masonry
+  grid:           { flexDirection: 'row', paddingHorizontal: PADDING, gap: COL_GAP },
+  col:            { width: COL_WIDTH },
 
-  // List
-  listContainer:    { paddingHorizontal: 16, paddingBottom: 24 },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 60 },
-  loadingText:      { fontSize: 16, marginTop: 12 },
-  emptyContainer:   { paddingTop: 60, alignItems: 'center', paddingHorizontal: 32 },
-  emptyText:        { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
+  // Pin card
+  pin:            { borderRadius: 18, marginBottom: COL_GAP, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
+  pinImgWrap:     { position: 'relative', width: '100%' },
+  pinImg:         { width: '100%', height: '100%', resizeMode: 'cover' },
+  pinScrim:       { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0)', backgroundImage: 'linear-gradient(transparent 40%, rgba(0,0,0,0.5))' },
+  pinCat:         { position: 'absolute', top: 8, left: 8, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
+  pinCatTxt:      { color: '#fff', fontSize: 9, fontWeight: 'bold' },
+  pinHeart:       { position: 'absolute', top: 6, right: 8, width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.9)', justifyContent: 'center', alignItems: 'center' },
+  pinRating:      { position: 'absolute', bottom: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
+  pinRatingTxt:   { color: '#fff', fontSize: 10, fontWeight: 'bold' },
+  pinBody:        { padding: 10 },
+  pinName:        { fontSize: 13, fontWeight: '800', marginBottom: 4, lineHeight: 18 },
+  pinDesc:        { fontSize: 11, lineHeight: 15, marginBottom: 8 },
+  pinFooter:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  pinPrice:       { fontSize: 13, fontWeight: 'bold', color: '#FF6347' },
+  pinAddBtn:      { width: 30, height: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center' },
+  pinAddTxt:      { color: '#fff', fontSize: 20, fontWeight: 'bold', lineHeight: 22 },
 
-  // Card
-  card:             { borderRadius: 20, marginBottom: 16, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 12, elevation: 5 },
-  imageWrapper:     { position: 'relative', width: '100%', height: 200 },
-  cardImage:        { width: '100%', height: '100%', resizeMode: 'cover' },
-  imageOverlay:     { ...StyleSheet.absoluteFillObject, background: 'transparent', backgroundImage: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4) 100%)' },
-  categoryPill:     { position: 'absolute', top: 12, left: 12, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  categoryPillText: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
-  heartBtn:         { position: 'absolute', top: 10, right: 12, width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.92)', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4 },
-  ratingBadge:      { position: 'absolute', bottom: 10, right: 12, backgroundColor: 'rgba(0,0,0,0.65)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
-  ratingBadgeText:  { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-
-  // Card body
-  cardBody:         { padding: 14 },
-  cardTopRow:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
-  cardName:         { fontSize: 17, fontWeight: '800', flex: 1, marginRight: 8 },
-  cardPrice:        { fontSize: 16, fontWeight: 'bold', color: '#FF6347' },
-  cardDesc:         { fontSize: 13, lineHeight: 18, marginBottom: 12 },
-  cardFooter:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  reviewsRow:       { flex: 1 },
-
-  // Add button
-  addBtn:           { paddingHorizontal: 18, paddingVertical: 9, borderRadius: 10 },
-  addBtnText:       { color: '#fff', fontWeight: 'bold', fontSize: 13 },
+  // Loading / empty
+  loadingBox:     { paddingTop: 80, alignItems: 'center' },
+  emptyBox:       { paddingTop: 80, alignItems: 'center' },
+  emptyTxt:       { fontSize: 18, fontWeight: 'bold', marginTop: 12 },
 
   // Modal
-  modalOverlay:     { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalSheet:       { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 36 },
-  modalHandle:      { width: 40, height: 4, backgroundColor: '#ccc', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
-  modalTitle:       { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
-  sortRow:          { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 12, marginBottom: 6 },
-  sortRowText:      { fontSize: 15 },
+  modalBg:        { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalSheet:     { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 40 },
+  sheetHandle:    { width: 36, height: 4, backgroundColor: '#ccc', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
+  sheetTitle:     { fontSize: 17, fontWeight: 'bold', marginBottom: 12 },
+  sortRow:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 12, marginBottom: 4 },
+  sortTxt:        { fontSize: 15 },
 
   // Success
-  successOverlay:   { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
-  successCard:      { backgroundColor: '#fff', padding: 24, borderRadius: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 16, elevation: 10 },
-  successText:      { fontSize: 15, fontWeight: 'bold', color: '#333', marginTop: 8 },
+  successOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
+  successCard:    { backgroundColor: '#fff', padding: 24, borderRadius: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 },
+  successTxt:     { fontSize: 14, fontWeight: 'bold', color: '#333', marginTop: 8 },
 });
 
 export default MenuScreen;
