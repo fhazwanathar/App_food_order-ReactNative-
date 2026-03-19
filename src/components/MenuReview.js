@@ -3,9 +3,27 @@ import { Button, FlatList, Text, TextInput, View } from 'react-native';
 import { addReview, getMenuReviews } from '../features/reviews';
 
 export default function MenuReview({ menu_item_id, user_id, user_name }) {
+  // State
+  const [userReview, setUserReview] = useState(null);
   const [rating, setRating] = useState(5);
   const [text, setText] = useState('');
-  const [reviews, setReviews] = useState([]);
+
+  // ---->> COPY INI <<----
+  useEffect(() => {
+    async function fetchUserReview() {
+      const { data, error } = await getUserReviewForMenu(menu_item_id, user_id);
+      setUserReview(data || null);
+      if (data) {
+        setRating(data.rating);
+        setText(data.text || '');
+      } else {
+        setRating(5);
+        setText('');
+      }
+    }
+    fetchUserReview();
+  }, [menu_item_id, user_id]);
+  // ----<< END COPY >>----
 
   // Fetch reviews when menu changes
   useEffect(() => {
