@@ -101,44 +101,40 @@ const TypewriterText = ({ text, style, delay = 0 }) => {
 };
 
 // ─── CTA Card (Menu & Cart) ────────────────────────────────────
+// ─── CTA Card — slide masuk dari kiri ke kanan ───────────────
 const CTACard = ({ icon, title, subtitle, color, accentColor, onPress, delay = 0 }) => {
-  const scaleAnim   = useRef(new Animated.Value(0)).current;
-  const pressScale  = useRef(new Animated.Value(1)).current;
-  const shimmerAnim = useRef(new Animated.Value(-1)).current;
+  const translateX = useRef(new Animated.Value(-width)).current; // mulai dari luar kiri
+  const opacity    = useRef(new Animated.Value(0)).current;
+  const pressScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Slide up masuk
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      friction: 5,
-      delay,
-      useNativeDriver: false,
-    }).start();
-
-    // Shimmer loop
-    Animated.loop(
-      Animated.timing(shimmerAnim, {
-        toValue: 2,
-        duration: 2500,
+    // Slide dari kiri + fade in bersamaan
+    Animated.parallel([
+      Animated.spring(translateX, {
+        toValue: 0,
+        friction: 7,
+        tension: 50,
+        delay,
         useNativeDriver: false,
-      })
-    ).start();
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 400,
+        delay,
+        useNativeDriver: false,
+      }),
+    ]).start();
   }, []);
 
   const handlePressIn  = () => Animated.spring(pressScale, { toValue: 0.95, friction: 5, useNativeDriver: false }).start();
   const handlePressOut = () => Animated.spring(pressScale, { toValue: 1,    friction: 3, useNativeDriver: false }).start();
 
-  const shimmerLeft = shimmerAnim.interpolate({
-    inputRange: [-1, 2],
-    outputRange: ['-100%', '200%'],
-  });
-
   return (
     <Animated.View style={[styles.ctaWrap, {
-      opacity: scaleAnim,
+      opacity,
       transform: [
+        { translateX },
         { scale: pressScale },
-        { translateY: scaleAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }
       ]
     }]}>
       <TouchableOpacity
@@ -148,20 +144,13 @@ const CTACard = ({ icon, title, subtitle, color, accentColor, onPress, delay = 0
         activeOpacity={1}
         style={[styles.ctaCard, { backgroundColor: color }]}
       >
-        {/* Shimmer overlay */}
-        <Animated.View style={[styles.ctaShimmer, { left: shimmerLeft }]} />
-
-        {/* Accent circle di pojok */}
         <View style={[styles.ctaAccent, { backgroundColor: accentColor }]} />
-
-        {/* Content */}
         <View style={styles.ctaContent}>
           <Text style={styles.ctaIcon}>{icon}</Text>
           <View style={{ flex: 1 }}>
             <Text style={styles.ctaTitle}>{title}</Text>
             <Text style={styles.ctaSub}>{subtitle}</Text>
           </View>
-          {/* Arrow */}
           <View style={[styles.ctaArrow, { backgroundColor: accentColor }]}>
             <Text style={styles.ctaArrowTxt}>→</Text>
           </View>
