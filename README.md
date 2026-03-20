@@ -39,8 +39,6 @@ Aplikasi pemesanan makanan berbasis **React Native + Expo** yang memungkinkan pe
 
 </div>
 
-> 📁 Simpan screenshot kamu di folder `assets/screenshots/` dengan nama file sesuai tabel di atas.
-
 ---
 
 ## ✨ Fitur
@@ -114,6 +112,16 @@ Setelah `npx expo start` berjalan:
 
 ```
 AplikasiPemesananMakanan/
+├── assets/
+│   ├── lottie/
+│   │   └── success.json
+│   └── screenshots/          ← Simpan screenshot app di sini
+│       ├── home.jpg
+│       ├── menu.jpg
+│       ├── profile.jpg
+│       └── settings.jpg
+├── pullrequest
+│   └── .gitattributes
 ├── scripts/
 │   └── reset-project.js
 ├── src/
@@ -126,8 +134,12 @@ AplikasiPemesananMakanan/
 │   │       ├── profile.jpg
 │   │       └── settings.jpg
 │   ├── components/
+│   │   ├── Aurora.native.js
+│   │   ├── AnimatedLogo.js
+│   │   ├── Aurora.web.js
 │   │   ├── CartItem.js
 │   │   ├── FoodCard.js
+│   │   ├── MenuReview.js
 │   │   ├── OnboardingAnimation.js
 │   │   ├── OnboardingAnimation.native.js
 │   │   └── SuccessAnimation.js
@@ -155,7 +167,9 @@ AplikasiPemesananMakanan/
 │   └── menuService.js
 ├── App.js
 ├── .gitignore
-└── package.json
+├── LICENSE
+├── package.json
+└── package-lock.json
 ```
 
 ---
