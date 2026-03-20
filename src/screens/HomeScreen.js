@@ -235,51 +235,44 @@ const HomeScreen = ({ navigation }) => {
           HERO HEADER
           ════════════════════════════════════════ */}
 
+{/* ══════════════════════════════════════
+    HERO
+    ══════════════════════════════════════ */}
 <View style={styles.hero}>
-  {/* ── Aurora WebGL background — hanya aktif di web ── */}
-  <Aurora
-    colorStops={['#FF6347', '#FF4500', '#CC2200']}
-    amplitude={1.2}
-    blend={0.6}
-    speed={0.8}
-  />
 
-  {/* Background solid fallback + circles */}
+  {/* 1. Background oranye base — paling bawah */}
   <View style={styles.heroBg} />
+
+  {/* 2. Decorative circles — di atas base */}
   <View style={styles.heroCircle1} />
   <View style={styles.heroCircle2} />
   <View style={styles.heroCircle3} />
 
-  <Animated.View style={{ opacity: headerAnim, alignItems: 'center', paddingTop: 20 }}>
+  {/* 3. Aurora — di atas circles, zIndex tinggi */}
+  <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+    <Aurora
+      colorStops={['#FF8C00', '#FF6347', '#FF2200']}
+      amplitude={1.4}
+      blend={0.7}
+      speed={0.6}
+    />
+  </View>
 
-    {/* ── Logo animasi garpu pisau piring ── */}
+  {/* 4. Dark overlay tipis biar teks tetap terbaca */}
+  <View style={styles.heroOverlay} />
+
+  {/* 5. Konten teks di paling atas */}
+  <Animated.View style={{ opacity: headerAnim, alignItems: 'center', paddingTop: 20, width: '100%', zIndex: 10 }}>
     <AnimatedLogo size={90} />
-
-    {/* Brand name typewriter */}
     <View style={styles.brandRow}>
-      <TypewriterText
-        text="FoodsStreets"
-        style={styles.brandName}
-        delay={800}
-      />
+      <TypewriterText text="FoodsStreets" style={styles.brandName} delay={800} />
     </View>
-
-    {/* Tagline */}
-    <Animated.Text style={[styles.tagline, {
-      opacity: headerAnim,
-      transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }]
-    }]}>
-      by fhaz • Street Food Experience
-    </Animated.Text>
-
-    {/* Greeting */}
+    <Text style={styles.tagline}>by fhaz • Street Food Experience</Text>
     <View style={styles.greetBox}>
       <Text style={styles.greetTxt}>
         {greeting()}, {userProfile?.name?.split(' ')[0] || 'Sobat'} 👋
       </Text>
     </View>
-
-    {/* Quick stats */}
     <View style={styles.quickStats}>
       <View style={styles.quickStat}>
         <Text style={styles.quickStatVal}>{menuItems?.length || 0}</Text>
@@ -406,6 +399,7 @@ const styles = StyleSheet.create({
   // ── Hero ──
   hero:               { paddingBottom: 24, alignItems: 'center', position: 'relative', overflow: 'hidden', minHeight: 380 },
   heroBg:             { ...StyleSheet.absoluteFillObject, backgroundColor: '#FF6347' },
+  heroOverlay:        { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.15)', zIndex: 2, },
   heroCircle1:        { position: 'absolute', top: -80, right: -80,  width: 260, height: 260, borderRadius: 130, backgroundColor: 'rgba(255,255,255,0.06)' },
   heroCircle2:        { position: 'absolute', bottom: -40, left: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(0,0,0,0.08)' },
   heroCircle3:        { position: 'absolute', top: 40,  left: -30,   width: 120, height: 120, borderRadius: 60,  backgroundColor: 'rgba(255,255,255,0.04)' },
