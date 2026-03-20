@@ -245,7 +245,6 @@ const HomeScreen = ({ navigation }) => {
       {/* ════════════════════════════════════════
           HERO HEADER
           ════════════════════════════════════════ */}
-      // Ganti bagian <View style={styles.hero}> sampai tutupnya dengan ini:
 
 <View style={styles.hero}>
   {/* ── Aurora WebGL background — hanya aktif di web ── */}
