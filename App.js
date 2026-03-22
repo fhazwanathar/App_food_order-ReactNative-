@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
+import NavBar from './src/components/NavBar';
 
 import { supabase } from './src/config/supabase';
 import { darkTheme, lightTheme } from './src/config/theme';
@@ -22,6 +23,8 @@ import SplashScreen from './src/screens/SplashScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
+
 
 const slideFromRight = {
   cardStyleInterpolator: ({ current, layouts }) => ({
