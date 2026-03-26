@@ -27,7 +27,7 @@ function DockItem({ tab, isActive, onClick, mouseX, badge }) {
   const targetSize = useTransform(
     mouseDistance,
     [-150, 0, 150],
-    [46, 68, 46]
+    [36, 56, 36]
   );
   const size = useSpring(targetSize, { mass: 0.1, stiffness: 150, damping: 12 });
 
@@ -144,23 +144,18 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
   const isHov   = useMotionValue(0);
 
   // Height dock — mengembang saat hover
-  const heightRow = useTransform(isHov, [0, 1], [80, 110]);
+  const heightRow = useTransform(isHov, [0, 1], [60, 80]);
   const height    = useSpring(heightRow, { mass: 0.1, stiffness: 150, damping: 12 });
 
   return (
     <motion.div
       style={{
         height,
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
         paddingBottom: 10,
         zIndex: 999,
-        pointerEvents: 'none',
       }}
     >
       <motion.div
@@ -169,15 +164,13 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
         style={{
           display: 'flex',
           flexDirection: 'row',
-          alignItems: 'flex-end',
-          gap: 10,
-          backgroundColor: 'rgba(10,10,10,0.85)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 22,
-          padding: '10px 14px',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,99,71,0.1)',
+          alignItems: 'center',
+          gap: 12,
+          backgroundColor: '#fff',
+          borderTop: '1px solid #e0e0e0',
+          borderRadius: 0,
+          padding: '8px 12px',
+          boxShadow: '0 -2px 6px rgba(0,0,0,0.1)',
           pointerEvents: 'all',
         }}
       >

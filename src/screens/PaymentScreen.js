@@ -9,6 +9,7 @@ import {
   View
 } from 'react-native';
 import { useApp } from '../context/AppContext';
+import { processEWalletPayment } from '../services/eWallet';
 
 const PaymentScreen = ({ navigation, route }) => {
   const { total } = route.params;
@@ -19,6 +20,7 @@ const PaymentScreen = ({ navigation, route }) => {
   const [orderNotes, setOrderNotes]             = useState('');
   const [customerName, setCustomerName]         = useState('');
   const [phoneNumber, setPhoneNumber]           = useState('');
+  const [isProcessing, setIsProcessing]         = useState(false);
 
   // ── Countdown state ──────────────────────────────────────
   const [showCountdown, setShowCountdown] = useState(false);
@@ -79,9 +81,23 @@ const PaymentScreen = ({ navigation, route }) => {
     if (!deliveryAddress.trim()) { Alert.alert('Error', 'Alamat pengiriman harus diisi!'); return; }
     if (!selectedPayment)        { Alert.alert('Error', 'Pilih metode pembayaran!'); return; }
 
+    const orderNum = `ORD${Date.now().toString().slice(-8)}`;
+
+    if (selectedPayment === 'ewallet') {
+      setIsProcessing(true);
+      try {
+        await processEWalletPayment('GoPay/OVO/Dana', total, orderNum);
+      } catch (err) {
+        setIsProcessing(false);
+        Alert.alert('Pembayaran Gagal', err.message || 'Terjadi kesalahan sistem.');
+        return;
+      }
+      setIsProcessing(false);
+    }
+
     const newOrder = {
       id: Date.now(),
-      orderNumber: `ORD${Date.now().toString().slice(-8)}`,
+      orderNumber: orderNum,
       items: [...cart],
       total,
       customerName,
@@ -113,7 +129,10 @@ setPendingOrder(savedOrder);
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
+            <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }}>
+        <TouchableOpacity style={styles.payButton} onPress={handlePayment} disabled={isProcessing}>
+          <Text style={styles.payButtonText}>{isProcessing ? 'Memproses E-Wallet...' : 'Konfirmasi & Bayar'}</Text>
+        </TouchableOpacity>
         {/* ── Form section — sama persis seperti sebelumnya ── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📋 Informasi Pemesan</Text>
@@ -160,9 +179,9 @@ setPendingOrder(savedOrder);
           <View style={styles.summaryRow}><Text style={styles.totalLabel}>Total Bayar:</Text><Text style={styles.totalValue}>Rp {total.toLocaleString('id-ID')}</Text></View>
         </View>
 
-        <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
-          <Text style={styles.payButtonText}>Konfirmasi & Bayar</Text>
-        </TouchableOpacity>
+        
+          
+        
 
         <View style={styles.bottomSpace} />
       </ScrollView>

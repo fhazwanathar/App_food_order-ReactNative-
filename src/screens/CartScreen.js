@@ -1,5 +1,7 @@
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useEffect } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useApp } from '../context/AppContext';
 
 const CartScreen = ({ navigation }) => {
@@ -118,18 +120,48 @@ const CartScreen = ({ navigation }) => {
     );
   }
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+useEffect(() => {
+  Animated.timing(fadeAnim, {
+    toValue: 1,
+    duration: 500,
+    useNativeDriver: true,
+  }).start();
+}, []);
+
+  const AnimatedCartItemWrapper = ({ item, index }) => {
+    const itemAnim = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+      Animated.timing(itemAnim, {
+        toValue: 1,
+        duration: 400,
+        delay: index * 100,
+        useNativeDriver: true,
+      }).start();
+    }, [index]);
+    
+    const translateY = itemAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] });
+    
+    return (
+      <Animated.View style={{ opacity: itemAnim, transform: [{ translateY }] }}>
+        <CartItem item={item} />
+      </Animated.View>
+    );
+  };
+
   return (
-    <View style={styles.container}>
-  {/* Header UI with icons */}
-  <View style={styles.header}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+  {/* Header UI with gradient */}
+  <LinearGradient colors={['#FF7E5F', '#FEB47B']} style={styles.header}>
     <MaterialCommunityIcons name="truck-delivery" size={32} color="#fff" />
     <Text style={styles.headerTitle}>Keranjang Belanja</Text>
     <MaterialCommunityIcons name="receipt" size={32} color="#fff" />
-  </View>
-  <FlatList
+  </LinearGradient>
+  <Animated.FlatList
     data={cart}
     keyExtractor={item => item.id.toString()}
-    renderItem={({ item }) => <CartItem item={item} />}
+    renderItem={({ item, index }) => <AnimatedCartItemWrapper item={item} index={index} />}
     contentContainerStyle={styles.listContainer}
   />
 
@@ -147,7 +179,7 @@ const CartScreen = ({ navigation }) => {
           <Text style={styles.checkoutButtonText}>Lanjut Pembayaran →</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 

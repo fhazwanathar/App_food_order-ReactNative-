@@ -28,36 +28,45 @@ import AnimatedDock from './src/components/AnimatedDock';
 const Tab   = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// ── Transisi slide dari kanan ──
-const slideFromRight = {
-  cardStyleInterpolator: ({ current, layouts }) => ({
-    cardStyle: {
-      transform: [{
-        translateX: current.progress.interpolate({
-          inputRange:  [0, 1],
-          outputRange: [layouts.screen.width, 0],
+// ── Animasi Transisi Kreatif ──
+const creativeTransition = {
+  cardStyleInterpolator: ({ current, layouts }) => {
+    return {
+      cardStyle: {
+        transform: [
+          {
+            translateX: current.progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [layouts.screen.width * 0.5, 0],
+            }),
+          },
+          {
+            scale: current.progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.9, 1],
+            }),
+          },
+        ],
+        opacity: current.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 1],
         }),
-      }],
-      opacity: current.progress.interpolate({
-        inputRange:  [0, 0.5, 1],
-        outputRange: [0, 0.8, 1],
-      }),
-    },
-  }),
+      },
+      overlayStyle: {
+        opacity: current.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 0.5],
+        }),
+      },
+    };
+  },
 };
 
-// ── Transisi scale dari tengah ──
-const scaleFromCenter = {
+const fadeTransition = {
   cardStyleInterpolator: ({ current }) => ({
     cardStyle: {
-      transform: [{
-        scale: current.progress.interpolate({
-          inputRange:  [0, 1],
-          outputRange: [0.85, 1],
-        }),
-      }],
       opacity: current.progress.interpolate({
-        inputRange:  [0, 1],
+        inputRange: [0, 1],
         outputRange: [0, 1],
       }),
     },
@@ -73,10 +82,12 @@ function MenuStack() {
       headerStyle:      { backgroundColor: theme.primary },
       headerTintColor:  '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
-      ...slideFromRight,
+      animationEnabled: true,
+      presentation: 'card',
+      ...creativeTransition,
     }}>
       <Stack.Screen name="MenuMain"   component={MenuScreen}       options={{ title: 'Menu' }} />
-      <Stack.Screen name="MenuDetail" component={MenuDetailScreen} options={{ title: 'Detail Menu', ...scaleFromCenter }} />
+      <Stack.Screen name="MenuDetail" component={MenuDetailScreen} options={{ title: 'Detail Menu', ...fadeTransition }} />
     </Stack.Navigator>
   );
 }
@@ -90,12 +101,14 @@ function CartStack() {
       headerStyle:      { backgroundColor: theme.primary },
       headerTintColor:  '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
-      ...slideFromRight,
+      animationEnabled: true,
+      presentation: 'card',
+      ...creativeTransition,
     }}>
       <Stack.Screen name="CartMain"        component={CartScreen}            options={{ title: 'Keranjang' }} />
       <Stack.Screen name="Payment"         component={PaymentScreen}         options={{ title: 'Pembayaran' }} />
-      <Stack.Screen name="Invoice"         component={InvoiceScreen}         options={{ title: 'Invoice', headerLeft: null, ...scaleFromCenter }} />
-      <Stack.Screen name="DeliveryTracker" component={DeliveryTrackerScreen} options={{ title: '🛵 Lacak Pesanan', ...slideFromRight }} />
+      <Stack.Screen name="Invoice"         component={InvoiceScreen}         options={{ title: 'Invoice', headerLeft: null, ...fadeTransition }} />
+      <Stack.Screen name="DeliveryTracker" component={DeliveryTrackerScreen} options={{ title: '🛵 Lacak Pesanan', ...creativeTransition }} />
     </Stack.Navigator>
   );
 }
