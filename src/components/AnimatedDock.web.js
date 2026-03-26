@@ -27,7 +27,7 @@ function DockItem({ tab, isActive, onClick, mouseX, badge }) {
   const targetSize = useTransform(
     mouseDistance,
     [-150, 0, 150],
-    [46, 68, 46]
+    [36, 56, 36]
   );
   const size = useSpring(targetSize, { mass: 0.1, stiffness: 150, damping: 12 });
 
@@ -144,7 +144,7 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
   const isHov   = useMotionValue(0);
 
   // Height dock — mengembang saat hover
-  const heightRow = useTransform(isHov, [0, 1], [80, 110]);
+  const heightRow = useTransform(isHov, [0, 1], [60, 80]);
   const height    = useSpring(heightRow, { mass: 0.1, stiffness: 150, damping: 12 });
 
   return (
