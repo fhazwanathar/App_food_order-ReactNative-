@@ -178,7 +178,11 @@ const MenuScreen = ({ navigation }) => {
     triggerSuccess();
   };
 
-  const categories  = ['Semua', 'Makanan Utama', 'Minuman'];
+  const categories = useMemo(() => {
+    if (!menuItems || menuItems.length === 0) return ['Semua', 'Makanan Utama', 'Minuman'];
+    const uniqueCats = [...new Set(menuItems.map(item => item.category))];
+    return ['Semua', ...uniqueCats];
+  }, [menuItems]);
   const sortOptions = [
     { value: 'name-asc',    label: '🔤 Nama A-Z' },
     { value: 'name-desc',   label: '🔤 Nama Z-A' },
