@@ -168,7 +168,10 @@ const nearbyStores = [
 
 // ─── Main Screen ──────────────────────────────────────────────
 const HomeScreen = ({ navigation }) => {
-  const { isDarkMode, userProfile, cart, menuItems } = useApp();
+  const { 
+    isDarkMode, userProfile, cart, menuItems, 
+    userLocation, updateUserLocation 
+  } = useApp();
   const theme   = isDarkMode ? darkTheme : lightTheme;
   const bg      = isDarkMode ? '#0a0a0a' : '#f5f5f5';
   const card    = isDarkMode ? '#161616' : '#ffffff';
@@ -176,9 +179,18 @@ const HomeScreen = ({ navigation }) => {
 
   const headerAnim = useRef(new Animated.Value(0)).current;
 
-  const [userLocation, setUserLocation]   = useState({ latitude: -6.2088, longitude: 106.8456 });
-  const [locationName, setLocationName]   = useState('Mendeteksi lokasi...');
   const [locationGranted, setLocationGranted] = useState(false);
+
+  const handleMapClick = async (lat, lng) => {
+    // Reverse geocode untuk dapat nama jalan sederhana
+    try {
+      const geo = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+      const addr = geo.length > 0 ? (geo[0].street ? `${geo[0].street}, ${geo[0].district}` : geo[0].district) : 'Lokasi Terpilih';
+      updateUserLocation(lat, lng, addr);
+    } catch (e) {
+      updateUserLocation(lat, lng, 'Lokasi Terpilih');
+    }
+  };
 
   useEffect(() => {
     Animated.timing(headerAnim, { toValue: 1, duration: 800, useNativeDriver: false }).start();
@@ -191,22 +203,21 @@ const HomeScreen = ({ navigation }) => {
           if (status === 'granted') {
             setLocationGranted(true);
             const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-            setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
             const geo = await Location.reverseGeocodeAsync({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
             if (geo.length > 0) {
               const g = geo[0];
-              setLocationName(g.district || g.subregion || g.city || 'Lokasi Kamu');
+              updateUserLocation(loc.coords.latitude, loc.coords.longitude, g.district || g.subregion || g.city);
             }
           } else {
-            setLocationName('Jakarta (default)');
+            updateUserLocation(-6.2088, 106.8456, 'Jakarta');
           }
-        } catch {
-          setLocationName('Jakarta (default)');
+        } catch (e) {
+          updateUserLocation(-6.2088, 106.8456, 'Jakarta');
         }
       })();
     } else {
       // Web: langsung pakai Jakarta default
-      setLocationName('Jakarta, Indonesia');
+      updateUserLocation(-6.2088, 106.8456, 'Jakarta, Indonesia');
       setLocationGranted(true);
     }
   }, []);
@@ -294,19 +305,19 @@ const HomeScreen = ({ navigation }) => {
         <View style={[styles.locationBar, { backgroundColor: isDarkMode ? '#252525' : '#fff5f3' }]}>
           <Text style={{ fontSize: 14 }}>📍</Text>
           <Text style={[styles.locationTxt, { color: isDarkMode ? '#ccc' : '#555' }]} numberOfLines={1}>
-            {locationName}
+            {userLocation.address}
           </Text>
           <View style={[styles.locationDot, { backgroundColor: locationGranted ? '#4CAF50' : '#FF6347' }]} />
         </View>
 
-        {/* Map — platform aware */}
         <View style={styles.mapBox}>
           <MapComponent
             latitude={userLocation.latitude}
             longitude={userLocation.longitude}
             isDarkMode={isDarkMode}
-            locationName={locationName}
+            locationName={userLocation.address}
             height={150}
+            onLocationSelect={handleMapClick}
           />
         </View>
 

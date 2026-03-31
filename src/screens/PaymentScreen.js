@@ -14,10 +14,10 @@ import PinInputModal from '../components/PinInputModal';
 
 const PaymentScreen = ({ navigation, route }) => {
   const { total } = route.params;
-  const { cart, saveOrder } = useApp();
+  const { cart, saveOrder, userLocation } = useApp();
 
   const [selectedPayment, setSelectedPayment] = useState(null);
-  const [deliveryAddress, setDeliveryAddress]   = useState('');
+  const [deliveryAddress, setDeliveryAddress]   = useState(userLocation.address);
   const [orderNotes, setOrderNotes]             = useState('');
   const [customerName, setCustomerName]         = useState('');
   const [phoneNumber, setPhoneNumber]           = useState('');
