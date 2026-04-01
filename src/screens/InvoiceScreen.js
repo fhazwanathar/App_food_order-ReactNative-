@@ -3,6 +3,7 @@ import {
   Alert,
   Animated,
   Dimensions,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,7 +23,7 @@ const InvoiceScreen = ({ navigation, route }) => {
       toValue: 0,
       friction: 5,
       tension: 40,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
   }, [slideAnim]);
 

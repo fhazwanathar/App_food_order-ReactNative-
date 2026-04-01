@@ -43,13 +43,13 @@ const PinInputModal = ({ visible, walletType, onComplete, onCancel }) => {
       setIsError(false);
       setIsVerifying(false);
       Animated.parallel([
-        Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, friction: 8 }),
-        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true })
+        Animated.spring(slideAnim, { toValue: 0, useNativeDriver: Platform.OS !== 'web', friction: 8 }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: Platform.OS !== 'web' })
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(slideAnim, { toValue: SCREEN_HEIGHT, duration: 300, useNativeDriver: true }),
-        Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: true })
+        Animated.timing(slideAnim, { toValue: SCREEN_HEIGHT, duration: 300, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: Platform.OS !== 'web' })
       ]).start();
     }
   }, [visible]);

@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 
 import { darkTheme, lightTheme } from './src/config/theme';
 import { AppProvider, useApp } from './src/context/AppContext';
@@ -21,6 +21,7 @@ import PaymentScreen from './src/screens/PaymentScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import SplashScreen from './src/screens/SplashScreen';
+import GatewayScreen from './src/screens/GatewayScreen'; // NEW
 
 // ── Animated Dock ──
 import AnimatedDock from './src/components/AnimatedDock';
@@ -79,7 +80,7 @@ function MenuStack() {
   const theme = isDarkMode ? darkTheme : lightTheme;
   return (
     <Stack.Navigator screenOptions={{
-      headerStyle:      { backgroundColor: theme.primary },
+      headerStyle:      { backgroundColor: theme.colors.primary },
       headerTintColor:  '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
       animationEnabled: true,
@@ -98,7 +99,7 @@ function CartStack() {
   const theme = isDarkMode ? darkTheme : lightTheme;
   return (
     <Stack.Navigator screenOptions={{
-      headerStyle:      { backgroundColor: theme.primary },
+      headerStyle:      { backgroundColor: theme.colors.primary },
       headerTintColor:  '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
       animationEnabled: true,
@@ -108,6 +109,7 @@ function CartStack() {
       <Stack.Screen name="CartMain"        component={CartScreen}            options={{ title: 'Keranjang' }} />
       <Stack.Screen name="Payment"         component={PaymentScreen}         options={{ title: 'Pembayaran' }} />
       <Stack.Screen name="Invoice"         component={InvoiceScreen}         options={{ title: 'Invoice', headerLeft: null, ...fadeTransition }} />
+      <Stack.Screen name="Gateway"         component={GatewayScreen}         options={{ title: 'Secure Payment', headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="DeliveryTracker" component={DeliveryTrackerScreen} options={{ title: '🛵 Lacak Pesanan', ...creativeTransition }} />
     </Stack.Navigator>
   );
@@ -143,7 +145,7 @@ function MainTabs() {
         />
       )}
       screenOptions={{
-        headerStyle:      { backgroundColor: theme.primary },
+        headerStyle:      { backgroundColor: theme.colors.primary },
         headerTintColor:  '#fff',
         headerTitleStyle: { fontWeight: 'bold' },
         contentStyle:     { paddingBottom: 90 },
@@ -163,7 +165,8 @@ function MainTabs() {
 function AppContent() {
   const [showSplash, setShowSplash]         = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
-  const { session, authLoading }            = useApp();
+  const { session, authLoading, isDarkMode } = useApp();
+  const theme = isDarkMode ? darkTheme : lightTheme;
 
   if (showSplash)     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   if (showOnboarding) return <OnboardingScreen onFinish={() => setShowOnboarding(false)} />;
@@ -175,7 +178,7 @@ function AppContent() {
   if (!session) return <AuthScreen />;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={theme}>
       <MainTabs />
     </NavigationContainer>
   );

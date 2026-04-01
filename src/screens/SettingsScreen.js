@@ -189,7 +189,7 @@ export default function SettingsScreen() {
               <Switch
                 value={isDarkMode}
                 onValueChange={toggleDarkMode}
-                trackColor={{ false: '#ddd', true: accentColor + '88' }}
+                trackColor={{ false: '#1a1818ff', true: accentColor + '88' }}
                 thumbColor={isDarkMode ? accentColor : '#f4f3f4'}
               />
             }

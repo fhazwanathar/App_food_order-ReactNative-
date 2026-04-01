@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -45,7 +46,7 @@ const OnboardingScreen = ({ onFinish }) => {
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 200,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start(() => {
       if (currentIndex < slides.length - 1) {
         setCurrentIndex(currentIndex + 1);
@@ -57,7 +58,7 @@ const OnboardingScreen = ({ onFinish }) => {
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 200,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }).start();
     });
   };

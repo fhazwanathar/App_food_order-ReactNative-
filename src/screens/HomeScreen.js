@@ -52,15 +52,15 @@ const CTACard = ({ icon, title, subtitle, color, accentColor, dustColor, onPress
     Animated.sequence([
       Animated.delay(delay),
       Animated.parallel([
-        Animated.spring(translateX, { toValue: 0, friction: 8, tension: 60, useNativeDriver: false }),
-        Animated.timing(opacity,    { toValue: 1, duration: 300, useNativeDriver: false }),
-        Animated.spring(scaleY,     { toValue: 1, friction: 5, tension: 70, useNativeDriver: false }),
+        Animated.spring(translateX, { toValue: 0, friction: 8, tension: 60, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(opacity,    { toValue: 1, duration: 300, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.spring(scaleY,     { toValue: 1, friction: 5, tension: 70, useNativeDriver: Platform.OS !== 'web' }),
       ]),
     ]).start();
     Animated.sequence([
       Animated.delay(delay + 300),
-      Animated.timing(glowOpacity, { toValue: 0.4, duration: 200, useNativeDriver: false }),
-      Animated.timing(glowOpacity, { toValue: 0,   duration: 400, useNativeDriver: false }),
+      Animated.timing(glowOpacity, { toValue: 0.4, duration: 200, useNativeDriver: Platform.OS !== 'web' }),
+      Animated.timing(glowOpacity, { toValue: 0,   duration: 400, useNativeDriver: Platform.OS !== 'web' }),
     ]).start();
   }, []);
 
@@ -72,8 +72,8 @@ const CTACard = ({ icon, title, subtitle, color, accentColor, dustColor, onPress
       <Animated.View style={{ opacity, transform: [{ translateX }, { scale: pressScale }, { scaleY }] }}>
         <TouchableOpacity
           onPress={onPress}
-          onPressIn={() => Animated.spring(pressScale, { toValue: 0.96, friction: 5, useNativeDriver: false }).start()}
-          onPressOut={() => Animated.spring(pressScale, { toValue: 1, friction: 3, useNativeDriver: false }).start()}
+          onPressIn={() => Animated.spring(pressScale, { toValue: 0.96, friction: 5, useNativeDriver: Platform.OS !== 'web' }).start()}
+          onPressOut={() => Animated.spring(pressScale, { toValue: 1, friction: 3, useNativeDriver: Platform.OS !== 'web' }).start()}
           activeOpacity={1}
           style={[styles.ctaCard, { backgroundColor: color }]}
         >
@@ -110,12 +110,12 @@ const DustParticle = ({ delay, color }) => {
     Animated.sequence([
       Animated.delay(startDelay),
       Animated.parallel([
-        Animated.timing(opacity, { toValue: 0.8, duration: 150, useNativeDriver: false }),
-        Animated.spring(scale,   { toValue: 1,   friction: 4,   useNativeDriver: false }),
-        Animated.timing(x,       { toValue: targetX, duration: 600, useNativeDriver: false }),
-        Animated.timing(y,       { toValue: targetY, duration: 600, useNativeDriver: false }),
+        Animated.timing(opacity, { toValue: 0.8, duration: 150, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.spring(scale,   { toValue: 1,   friction: 4,   useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(x,       { toValue: targetX, duration: 600, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(y,       { toValue: targetY, duration: 600, useNativeDriver: Platform.OS !== 'web' }),
       ]),
-      Animated.timing(opacity, { toValue: 0, duration: 400, useNativeDriver: false }),
+      Animated.timing(opacity, { toValue: 0, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
     ]).start();
   }, []);
 
@@ -133,19 +133,29 @@ const DustParticle = ({ delay, color }) => {
 // ─── Store Card ───────────────────────────────────────────────
 const StoreCard = ({ store }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const { isDarkMode } = useApp();
+  const card = isDarkMode ? '#222' : '#ffffff';
+  const textCol = isDarkMode ? '#f0f0f0' : '#333';
+  const subText = isDarkMode ? '#999' : '#666';
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: Platform.OS !== 'web' }).start();
+  }, []);
+
   return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+    <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ scale: scaleAnim }] }}>
       <TouchableOpacity
-        onPressIn={() => Animated.spring(scaleAnim, { toValue: 0.96, friction: 5, useNativeDriver: false }).start()}
-        onPressOut={() => Animated.spring(scaleAnim, { toValue: 1, friction: 3, useNativeDriver: false }).start()}
-        activeOpacity={1} style={styles.storeCard}
+        onPressIn={() => Animated.spring(scaleAnim, { toValue: 0.95, friction: 5, useNativeDriver: Platform.OS !== 'web' }).start()}
+        onPressOut={() => Animated.spring(scaleAnim, { toValue: 1, friction: 3, useNativeDriver: Platform.OS !== 'web' }).start()}
+        activeOpacity={1} style={[styles.storeCard, { backgroundColor: card }]}
       >
         <Image source={{ uri: store.image }} style={styles.storeImg} />
         <View style={styles.storeOverlay} />
         <View style={styles.storeInfo}>
-          <Text style={styles.storeName} numberOfLines={1}>{store.name}</Text>
+          <Text style={[styles.storeName, { color: textCol }]} numberOfLines={1}>{store.name}</Text>
           <View style={styles.storeMeta}>
-            <Text style={styles.storeDist}>📍 {store.distance}</Text>
+            <Text style={[styles.storeDist, { color: subText }]}>📍 {store.distance}</Text>
             <View style={styles.storeRatingBadge}>
               <Text style={styles.storeRating}>⭐ {store.rating}</Text>
             </View>
@@ -155,8 +165,6 @@ const StoreCard = ({ store }) => {
     </Animated.View>
   );
 };
-
-// ─── Map Component logic ditangani oleh MapComponent.js ───
 
 // ─── Data Toko ────────────────────────────────────────────────
 const nearbyStores = [
@@ -182,7 +190,6 @@ const HomeScreen = ({ navigation }) => {
   const [locationGranted, setLocationGranted] = useState(false);
 
   const handleMapClick = async (lat, lng) => {
-    // Reverse geocode untuk dapat nama jalan sederhana
     try {
       const geo = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
       const addr = geo.length > 0 ? (geo[0].street ? `${geo[0].street}, ${geo[0].district}` : geo[0].district) : 'Lokasi Terpilih';
@@ -193,9 +200,8 @@ const HomeScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    Animated.timing(headerAnim, { toValue: 1, duration: 800, useNativeDriver: false }).start();
+    Animated.timing(headerAnim, { toValue: 1, duration: 800, useNativeDriver: Platform.OS !== 'web' }).start();
 
-    // Lokasi hanya di mobile, web pakai default Jakarta
     if (Platform.OS !== 'web') {
       (async () => {
         try {
@@ -216,7 +222,6 @@ const HomeScreen = ({ navigation }) => {
         }
       })();
     } else {
-      // Web: langsung pakai Jakarta default
       updateUserLocation(-6.2088, 106.8456, 'Jakarta, Indonesia');
       setLocationGranted(true);
     }
@@ -239,7 +244,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.heroCircle1} />
         <View style={styles.heroCircle2} />
         <View style={styles.heroCircle3} />
-        <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+        <View style={[StyleSheet.absoluteFillObject, { pointerEvents: 'none' }]}>
           <Aurora colorStops={['#FF8C00', '#FF6347', '#FF2200']} amplitude={1.4} blend={0.7} speed={0.6} />
         </View>
         <View style={styles.heroOverlay} />
@@ -274,24 +279,29 @@ const HomeScreen = ({ navigation }) => {
         </Animated.View>
       </View>
 
-      {/* ══ CTA ══ */}
+      {/* ══ QUICK NAV ══ */}
       <View style={styles.ctaSection}>
-        <Text style={[styles.ctaSectionTitle, { color: textCol }]}>Mau ngapain hari ini?</Text>
-        <CTACard icon="🍔" title="Jelajahi Menu"
-          subtitle={`${menuItems?.length || 0} pilihan makanan & minuman`}
-          color="#FF6347" accentColor="#e0432a" dustColor="#FFB347"
-          onPress={() => navigation.navigate('Menu')} delay={300} />
-        <CTACard icon="🛒" title="Keranjang Saya"
-          subtitle={cart.length > 0 ? `${cart.length} item menunggu checkout` : 'Belum ada item — yuk tambah!'}
-          color="#1a1a2e" accentColor="#FF6347" dustColor="#FF6347"
-          onPress={() => navigation.navigate('Cart')} delay={550} />
-        <CTACard icon="📋" title="Riwayat Pesanan"
-          subtitle="Cek status & pesan ulang favoritmu"
-          color="#0f3460" accentColor="#4CAF50" dustColor="#4CAF50"
-          onPress={() => navigation.navigate('History')} delay={800} />
+        <Text style={[styles.ctaSectionTitle, { color: textCol }]}>Layanan Kami</Text>
+        <CTACard
+          icon="🛵"
+          title="Pesan Antar"
+          subtitle="Makanan favorit di depan pintu"
+          color="#FF6347"
+          accentColor="#FF4500"
+          onPress={() => navigation.navigate('Menu')}
+        />
+        <CTACard
+          icon="🥡"
+          title="Ambil Sendiri"
+          subtitle="Pesan dulu, ambil kemudian"
+          color={isDarkMode ? '#1e293b' : '#3b82f6'}
+          accentColor={isDarkMode ? '#0f172a' : '#2563eb'}
+          onPress={() => navigation.navigate('Menu')}
+          delay={100}
+        />
       </View>
 
-      {/* ══ TOKO DI SEKITAR ══ */}
+      {/* ══ NEARBY MAP ══ */}
       <View style={[styles.section, { backgroundColor: card }]}>
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: textCol }]}>📍 Toko di Sekitar</Text>
@@ -401,13 +411,13 @@ const styles = StyleSheet.create({
 
   // Store scroll
   storeScroll:      { marginHorizontal: -4 },
-  storeCard:        { width: 150, marginRight: 12, borderRadius: 14, overflow: 'hidden', backgroundColor: '#1a1a1a' },
+  storeCard:        { width: 150, marginRight: 12, borderRadius: 14, overflow: 'hidden' },
   storeImg:         { width: '100%', height: 100, resizeMode: 'cover' },
   storeOverlay:     { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)' },
   storeInfo:        { padding: 10 },
-  storeName:        { fontSize: 13, fontWeight: '700', color: '#fff', marginBottom: 6 },
+  storeName:        { fontSize: 13, fontWeight: '700', marginBottom: 6 },
   storeMeta:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  storeDist:        { fontSize: 10, color: 'rgba(255,255,255,0.7)' },
+  storeDist:        { fontSize: 10 },
   storeRatingBadge: { backgroundColor: 'rgba(255,99,71,0.8)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
   storeRating:      { fontSize: 10, color: '#fff', fontWeight: 'bold' },
 

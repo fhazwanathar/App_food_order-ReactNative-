@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useApp } from '../context/AppContext';
 
 const CartScreen = ({ navigation }) => {
@@ -126,7 +126,7 @@ useEffect(() => {
   Animated.timing(fadeAnim, {
     toValue: 1,
     duration: 500,
-    useNativeDriver: true,
+    useNativeDriver: Platform.OS !== 'web',
   }).start();
 }, []);
 

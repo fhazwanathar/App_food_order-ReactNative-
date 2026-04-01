@@ -14,7 +14,11 @@ import PinInputModal from '../components/PinInputModal';
 
 const PaymentScreen = ({ navigation, route }) => {
   const { total } = route.params;
-  const { cart, saveOrder, userLocation } = useApp();
+  const { isDarkMode, cart, saveOrder, userLocation } = useApp();
+  const bg = isDarkMode ? '#0a0a0a' : '#f5f5f5';
+  const card = isDarkMode ? '#161616' : '#ffffff';
+  const textCol = isDarkMode ? '#f0f0f0' : '#1a1a1a';
+  const border = isDarkMode ? '#333' : '#e0e0e0';
 
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [deliveryAddress, setDeliveryAddress]   = useState(userLocation.address);
@@ -138,15 +142,10 @@ const PaymentScreen = ({ navigation, route }) => {
       Alert.alert('Error', 'Gagal menyimpan pesanan. Coba lagi.');
       return;
     }
-    setPendingOrder(savedOrder);
-
-    // Mulai countdown
-    setCountdownNum(3);
-    setShowCountdown(true);
+    
+    // Redirect ke Gateway Simulation
+    navigation.navigate('Gateway', { total, orderData: savedOrder });
   };
-
-  const countdownDisplay = countdownNum === 0 ? '🚀' : countdownNum.toString();
-  const countdownLabel   = countdownNum === 0 ? 'Pesanan Dikirim!' : 'Pesanan dikonfirmasi...';
 
   return (
     <View style={{ flex: 1 }}>
@@ -203,36 +202,6 @@ const PaymentScreen = ({ navigation, route }) => {
         <View style={styles.bottomSpace} />
       </ScrollView>
 
-      {/* ── Countdown Overlay ── */}
-      {showCountdown && (
-        <View style={styles.countdownOverlay}>
-          <View style={styles.countdownCard}>
-            <Text style={styles.countdownLabel}>{countdownLabel}</Text>
-            <Animated.Text style={[
-              styles.countdownNumber,
-              {
-                transform: [{ scale: scaleAnim }],
-                opacity: opacityAnim,
-                color: countdownNum === 0 ? '#4CAF50' : '#FF6347',
-              }
-            ]}>
-              {countdownDisplay}
-            </Animated.Text>
-            <View style={styles.countdownDots}>
-              {[3, 2, 1].map(n => (
-                <View key={n} style={[
-                  styles.countdownDot,
-                  { backgroundColor: n >= countdownNum && countdownNum > 0 ? '#FF6347' : '#eee' }
-                ]} />
-              ))}
-            </View>
-            <Text style={styles.countdownSub}>
-              {countdownNum > 0 ? `Memproses pesanan...` : 'Mengarahkan ke invoice...'}
-            </Text>
-          </View>
-        </View>
-      )}
-
       {/* ── PIN Entry Modal ── */}
       <PinInputModal
         visible={showPinModal}
@@ -245,23 +214,23 @@ const PaymentScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container:            { flex: 1, backgroundColor: '#f5f5f5' },
-  section:              { backgroundColor: '#fff', padding: 16, marginTop: 12 },
-  sectionTitle:         { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 16 },
-  label:                { fontSize: 14, fontWeight: '600', color: '#666', marginBottom: 8, marginTop: 8 },
-  input:                { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 12, fontSize: 15, borderWidth: 1, borderColor: '#e0e0e0' },
+  container:            { flex: 1 },
+  section:              { padding: 16, marginTop: 12 },
+  sectionTitle:         { fontSize: 16, fontWeight: 'bold', marginBottom: 16 },
+  label:                { fontSize: 14, fontWeight: '600', marginBottom: 8, marginTop: 8 },
+  input:                { borderRadius: 8, padding: 12, fontSize: 15, borderWidth: 1 },
   textArea:             { height: 80, textAlignVertical: 'top' },
-  paymentCard:          { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#f9f9f9', borderRadius: 12, marginBottom: 12, borderWidth: 2, borderColor: 'transparent' },
-  paymentCardSelected:  { borderColor: '#FF6347', backgroundColor: '#fff5f4' },
+  paymentCard:          { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderRadius: 12, marginBottom: 12, borderWidth: 2, borderColor: 'transparent' },
+  paymentCardSelected:  { borderColor: '#FF6347' },
   paymentLeft:          { flexDirection: 'row', alignItems: 'center', flex: 1 },
   paymentIcon:          { fontSize: 32, marginRight: 12 },
-  paymentName:          { fontSize: 15, fontWeight: 'bold', color: '#333', marginBottom: 4 },
-  paymentDesc:          { fontSize: 12, color: '#666' },
-  radioButton:          { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#ccc', justifyContent: 'center', alignItems: 'center' },
+  paymentName:          { fontSize: 15, fontWeight: 'bold', marginBottom: 4 },
+  paymentDesc:          { fontSize: 12 },
+  radioButton:          { width: 24, height: 24, borderRadius: 12, borderWidth: 2, justifyContent: 'center', alignItems: 'center' },
   radioButtonSelected:  { borderColor: '#FF6347' },
   radioButtonInner:     { width: 12, height: 12, borderRadius: 6, backgroundColor: '#FF6347' },
-  summarySection:       { backgroundColor: '#fff', padding: 16, marginTop: 12 },
-  summaryTitle:         { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 12 },
+  summarySection:       { padding: 16, marginTop: 12 },
+  summaryTitle:         { fontSize: 16, fontWeight: 'bold', marginBottom: 12 },
   summaryRow:           { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   summaryLabel:         { fontSize: 14, color: '#666' },
   summaryValue:         { fontSize: 14, color: '#333', fontWeight: '500' },

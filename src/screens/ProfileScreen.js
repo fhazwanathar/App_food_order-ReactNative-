@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Alert, Animated, Dimensions, Linking, ScrollView, StyleSheet,
+  Alert, Animated, Dimensions, Linking, Platform, ScrollView, StyleSheet,
   Switch, Text, TextInput, TouchableOpacity, View
 } from 'react-native';
 import { darkTheme, lightTheme } from '../config/theme';
@@ -18,8 +18,8 @@ const StatCard = ({ icon, value, label, isDark, delay = 0 }) => {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.spring(scaleAnim, { toValue: 1, friction: 5, tension: 60, delay, useNativeDriver: true }),
-      Animated.timing(opacityAnim, { toValue: 1, duration: 400, delay, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, friction: 5, tension: 60, delay, useNativeDriver: Platform.OS !== 'web' }),
+      Animated.timing(opacityAnim, { toValue: 1, duration: 400, delay, useNativeDriver: Platform.OS !== 'web' }),
     ]).start();
   }, []);
 
@@ -43,7 +43,7 @@ const AnimatedSection = ({ children, delay = 0 }) => {
       toValue: 1,
       duration: 600,
       delay,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
   }, [anim, delay]);
 
@@ -106,7 +106,7 @@ const ProfileScreen = () => {
         toValue: 1,
         duration: 500,
         delay: i * 120,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }).start();
     });
   };
