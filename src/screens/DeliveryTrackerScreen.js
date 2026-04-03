@@ -182,12 +182,12 @@ const DeliveryTrackerScreen = ({ route, navigation }) => {
                 </Text>
               </View>
 
-              {/* Map Routing Real-time */}
+              {/* Map Routing Real-time - Persegi & Lebih Tinggi */}
               <View style={styles.mapContainer}>
                 <MapComponent 
                   latitude={driverLoc.latitude} 
                   longitude={driverLoc.longitude} 
-                  height={220}
+                  height={width - 32}
                   isDarkMode={isDarkMode}
                   locationName={isPreparing ? 'Restoran' : 'E-Kurir'}
                   showRoute={true}
@@ -278,7 +278,14 @@ const styles = StyleSheet.create({
   mallBadgeText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
   storeName: { fontSize: 15, fontWeight: 'bold' },
   statusText: { fontSize: 14, color: '#EE4D2D', fontWeight: 'bold' },
-  mapContainer: { height: 220, borderRadius: 15, overflow: 'hidden', marginBottom: 20, position: 'relative' },
+  mapContainer: { 
+    aspectRatio: 1, 
+    width: '100%', 
+    borderRadius: 15, 
+    overflow: 'hidden', 
+    marginBottom: 20, 
+    position: 'relative' 
+  },
   prepOverlay: {
     position: 'absolute', top: 15, right: 15, backgroundColor: 'rgba(255,255,255,0.95)',
     padding: 10, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 8, elevation: 5
