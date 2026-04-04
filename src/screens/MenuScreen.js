@@ -338,11 +338,11 @@ const MenuScreen = ({ navigation }) => {
         <MaterialCommunityIcons name="food" size={32} color={theme.primary} />
         <Text style={styles.menuHeaderTitle}>Aplikasi Pemesanan Makanan</Text>
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }} showsVerticalScrollIndicator={false} stickyHeaderIndices={[1]}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         <RestaurantOpeningHeader />
 
         {/* ── Sticky Header ── */}
-        <View style={[styles.header, { backgroundColor: theme.background, zIndex: 20 }]}>
+        <View style={[styles.header, { backgroundColor: theme.background }]}>
           {/* Search */}
           <View style={[styles.searchBar, { backgroundColor: theme.card }]}>
             <Text style={{ fontSize: 16, marginRight: 8 }}>🔍</Text>
