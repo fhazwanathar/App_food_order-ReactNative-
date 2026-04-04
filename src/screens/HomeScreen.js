@@ -853,7 +853,11 @@ const HomeScreen = ({ navigation }) => {
                 <View style={styles.comparisonRow}>
                   <View style={styles.comparisonCol}>
                     <View style={styles.compImgWrap}>
-                      <Image source={{ uri: trend.image }} style={styles.compImg} />
+                      <Image 
+                        source={{ uri: trend.image }} 
+                        style={styles.compImg}
+                        defaultSource={require('../../assets/icon.png')} // Fallback jika blank
+                      />
                       <View style={styles.compBadgeInternet}>
                         <Text style={styles.compBadgeTxt}>INTERNET</Text>
                       </View>
@@ -878,7 +882,10 @@ const HomeScreen = ({ navigation }) => {
                   <Text style={[styles.spotlightMatch, { color: '#8b5cf6' }]}>Kecocokan {trend.matchScore}%</Text>
                   <TouchableOpacity 
                     style={styles.spotlightBtn}
-                    onPress={() => navigation.navigate('MenuDetail', { item: trend.matchedMenu })}
+                    onPress={() => navigation.navigate('Menu', { 
+                      screen: 'MenuDetail', 
+                      params: { item: trend.matchedMenu } 
+                    })}
                   >
                     <Text style={styles.spotlightBtnTxt}>Cek Menu →</Text>
                   </TouchableOpacity>

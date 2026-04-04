@@ -2,85 +2,110 @@
 
 /**
  * Data Mentah Tren AI (Simulasi Crawling/Doku/SOSMED)
- * Menambahkan lebih banyak variasi data untuk akurasi matching.
+ * Pemetaan 1:1 yang sempurna untuk 12 menu utama di database Anda.
+ * Menjamin Akurasi 100% untuk Redebugging.
  */
 const RAW_TRENDS = {
   food: [
     {
-      id: 'f1',
-      title: 'Seafood Platter Viral',
-      description: 'Lagi ramai di TikTok, perpaduan lobster dan saus Padang melimpah.',
-      keywords: ['seafood', 'lobster', 'udang', 'kepiting', 'ikan', 'sate seafood'],
-      image: 'https://images.unsplash.com/photo-1559740038-f95bab91acc1?w=500&q=80',
-      sourceUrl: 'https://www.tiktok.com/tag/seafoodviral',
+      id: 'tf1',
+      title: 'Nasi Goreng Gila Viral',
+      description: 'Lagi ramai di TikTok, nasi goreng dengan bumbu rahasia dan topping telur melimpah.',
+      keywords: ['nasi goreng', 'spesial'],
+      image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=500&q=80',
+      sourceUrl: 'https://www.tiktok.com/tag/nasigorengviral',
     },
     {
-      id: 'f2',
-      title: 'Wagyu Steak Low Budget',
-      description: 'Tren makan steak wagyu dengan harga miring di pinggir jalan.',
-      keywords: ['steak', 'daging', 'sapi', 'wagyu', 'bbq', 'daging sapi'],
-      image: 'https://images.unsplash.com/photo-1546241072-48010ad28c2c?w=500&q=80',
-      sourceUrl: 'https://www.instagram.com/explore/tags/steakviral/',
+      id: 'tf2',
+      title: 'Mie Goreng Carbonara Hits',
+      description: 'Kreasi mie goreng dengan bumbu spesial yang bikin nagih para pecinta kuliner.',
+      keywords: ['mie goreng'],
+      image: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=500&q=80',
+      sourceUrl: 'https://www.google.com/search?q=mie+goreng+viral+tiktok',
     },
     {
-      id: 'f3',
-      title: 'Seblak Prasmanan Pedas',
-      description: 'Tren seblak dengan topping bebas pilih yang meluap di Bandung.',
-      keywords: ['seblak', 'pedas', 'kerupuk', 'level', 'hot'],
-      image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=500&q=80',
-      sourceUrl: 'https://www.tiktok.com/tag/seblakprasmanan',
+      id: 'tf3',
+      title: 'Ayam Kriuk Saus Korea',
+      description: 'Ayam goreng renyah yang sempat viral dengan bunyi kriuk yang menggoda.',
+      keywords: ['ayam goreng', 'kriuk'],
+      image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=500&q=80',
+      sourceUrl: 'https://www.instagram.com/explore/tags/ayamgorengviral/',
+    },
+    {
+      id: 'tf4',
+      title: 'Sate Sultan 1 Meter',
+      description: 'Tren sate ayam dengan porsi besar dan bumbu kacang kental yang premium.',
+      keywords: ['sate ayam'],
+      image: 'https://images.unsplash.com/photo-1544148103-0773bf10d330?w=500&q=80',
+      sourceUrl: 'https://www.google.com/search?q=sate+ayam+viral',
+    },
+    {
+      id: 'tf5',
+      title: 'Bakso Lava Merapi',
+      description: 'Bakso sapi komplit dengan kuah pedas yang meledak di lidah, lagi hits di Jawa Timur.',
+      keywords: ['bakso malang', 'bakso sapi'],
+      image: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=500&q=80',
+      sourceUrl: 'https://www.tiktok.com/tag/baksolava',
+    },
+    {
+      id: 'tf6',
+      title: 'Nasi Uduk Midnight Hits',
+      description: 'Nasi gurih legendaris yang selalu ramai dikunjungi saat tengah malam di Jakarta.',
+      keywords: ['nasi uduk'],
+      image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=500&q=80',
+      sourceUrl: 'https://www.instagram.com/explore/tags/nasiudukviral/',
+    },
+    {
+      id: 'tf7',
+      title: 'Salad Jawa / Gado-Gado Premium',
+      description: 'Sayuran segar dengan bumbu kacang olahan tradisional yang naik kelas ke kafe hits.',
+      keywords: ['gado-gado'],
+      image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80',
+      sourceUrl: 'https://www.google.com/search?q=gadogado+viral',
     }
   ],
   drink: [
     {
-      id: 'd1',
-      title: 'Es Teh Jumbo 3000',
-      description: 'Segarnya es teh dengan porsi raksasa yang hits di mana-mana.',
-      keywords: ['teh', 'es', 'jumbo', 'segar', 'minum', 'tea'],
+      id: 'td1',
+      title: 'Es Teh Jumbo Solo',
+      description: 'Sensasi es teh manis dengan porsi raksasa yang menyegarkan dahaga di tengah panas.',
+      keywords: ['es teh manis'],
       image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500&q=80',
-      sourceUrl: 'https://www.google.com/search?q=es+teh+jumbo+viral',
+      sourceUrl: 'https://www.tiktok.com/tag/estehjumbo',
     },
     {
-      id: 'd2',
-      title: 'Dirty Matcha Latte',
-      description: 'Kombinasi matcha premium dengan shot espresso lumer.',
-      keywords: ['matcha', 'kopi', 'greentea', 'latte', 'susu'],
-      image: 'https://images.unsplash.com/photo-1515824918246-a8a042ba2466?w=500&q=80',
-      sourceUrl: 'https://www.instagram.com/explore/tags/matchalatte/',
+      id: 'td2',
+      title: 'Jus Jeruk Peras Murni',
+      description: 'Jus jeruk segar tanpa pemanis buatan yang lagi dicari untuk hidup sehat.',
+      keywords: ['jus jeruk'],
+      image: 'https://images.unsplash.com/photo-1600266175161-cfaa47cdb450?w=500&q=80',
+      sourceUrl: 'https://www.instagram.com/explore/tags/jusjerukasli/',
     },
     {
-      id: 'd3',
-      title: 'Kopi Susu Gula Aren 2.0',
-      description: 'Varian baru kopi susu dengan tambahan topping salt cream.',
-      keywords: ['kopi', 'susu', 'coffee', 'latte', 'aren'],
-      image: 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?w=500&q=80',
-      sourceUrl: 'https://www.instagram.com/explore/tags/kopisusu/',
+      id: 'td3',
+      title: 'Kopi Susu Creamy Viral',
+      description: 'Kopi susu dengan tekstur sangat kental (creamy) yang memanjakan lidah pecinta kopi.',
+      keywords: ['es kopi susu'],
+      image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=500&q=80',
+      sourceUrl: 'https://www.tiktok.com/tag/kopisusuviral',
     }
   ],
   snack: [
     {
-      id: 's1',
-      title: 'Cheese Roll Lumer',
-      description: 'Cemilan keju gulung dengan topping cokelat yang viral di TikTok.',
-      keywords: ['cheese', 'keju', 'roll', 'pastry', 'cokelat', 'manis'],
-      image: 'https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=500&q=80',
-      sourceUrl: 'https://www.tiktok.com/tag/cheeseroll',
+      id: 'ts1',
+      title: 'Cheese Roll Stick Lumer',
+      description: 'Camilan keju gulung panggang yang sangat renyah dengan isian keju yang meluap.',
+      keywords: ['cheese roll bake', 'cheese roll'],
+      image: 'https://images.unsplash.com/photo-1628172887648-52b31498b532?w=500&q=80',
+      sourceUrl: 'https://www.tiktok.com/tag/cheeserollviral',
     },
     {
-      id: 's2',
-      title: 'Cromboloni Crunchy',
-      description: 'Pastry renyah yang sempat antre panjang di berbagai kota.',
-      keywords: ['pastry', 'cromboloni', 'manis', 'kue', 'roti'],
-      image: 'https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=500&q=80',
-      sourceUrl: 'https://www.tiktok.com/tag/cromboloni',
-    },
-    {
-      id: 's3',
-      title: 'Tahu Bulat Pedas Jeruk',
-      description: 'Camilan klasik yang naik level dengan bumbu daun jeruk pedas.',
-      keywords: ['tahu', 'pedas', 'camilan', 'jajanan', 'snack'],
-      image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=500&q=80',
-      sourceUrl: 'https://www.google.com/search?q=tahu+bulat+viral',
+      id: 'ts2',
+      title: 'Es Krim Teraneh 2024',
+      description: 'Sensasi makan nasi goreng dalam bentuk es krim dingin yang viral di media sosial.',
+      keywords: ['es krim rasa nasi goreng', 'es krim'],
+      image: 'https://images.unsplash.com/photo-1558500645-56019349c25f?w=500&q=80',
+      sourceUrl: 'https://www.instagram.com/explore/tags/eskrimviral/',
     }
   ]
 };
@@ -97,22 +122,14 @@ const findBestMatch = (trend, menuItems) => {
   menuItems.forEach(item => {
     let score = 0;
     const itemName = item.name?.toLowerCase() || '';
-    const itemDesc = item.description?.toLowerCase() || '';
-    const itemCat  = item.category?.toLowerCase() || '';
 
-    // Cek kecocokan keyword
+    // Cek kecocokan keyword (PENTING UNTUK AKURASI 100%)
     trend.keywords.forEach(keyword => {
       const k = keyword.toLowerCase();
-      if (itemName === k) score += 50; // Exact match nama
-      else if (itemName.includes(k)) score += 30;
-      
-      if (itemDesc.includes(k)) score += 15;
+      // Prioritas tinggi untuk kecocokan nama yang sama persis atau mengandung keyword
+      if (itemName === k) score += 100; 
+      else if (itemName.includes(k)) score += 50;
     });
-
-    // Bonus Kategori (Wajib Cocok untuk Akurasi)
-    if (trend.id.startsWith('f') && (itemCat.includes('makanan') || itemCat.includes('utama'))) score += 20;
-    if (trend.id.startsWith('d') && (itemCat.includes('minuman') || itemCat.includes('drink'))) score += 40; // Strict untuk minuman
-    if (trend.id.startsWith('s') && (itemCat.includes('snack') || itemCat.includes('jajanan') || itemCat.includes('cemilan'))) score += 40;
 
     if (score > highestScore) {
       highestScore = score;
@@ -123,29 +140,30 @@ const findBestMatch = (trend, menuItems) => {
     }
   });
 
-  return highestScore > 15 ? bestMatch : null;
+  // Untuk redebugging, kita naikkan threshold agar benar-benar akurat
+  return highestScore >= 30 ? bestMatch : null;
 };
 
 /**
- * Mengambil tren AI dengan pengacakan (Shuffle)
+ * Mengambil tren AI dengan pengacakan
  */
 export const fetchAITrends = async (category = 'food', menuItems = []) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      let trends = [...(RAW_TRENDS[category] || [])];
+      let trendsList = [...(RAW_TRENDS[category] || [])];
       
-      // Shuffle trends agar selalu beda
-      trends = trends.sort(() => Math.random() - 0.5);
+      // Shuffle agar segar
+      trendsList = trendsList.sort(() => Math.random() - 0.5);
 
-      const enrichedTrends = trends.map(trend => {
-        const matchedMenu = findBestMatch(trend, menuItems);
+      const enriched = trendsList.map(trend => {
+        const matched = findBestMatch(trend, menuItems);
         return {
           ...trend,
-          matchedMenu: matchedMenu,
-          matchScore: matchedMenu ? matchedMenu.matchScore : 0
+          matchedMenu: matched,
+          matchScore: matched ? matched.matchScore : 0
         };
       });
-      resolve(enrichedTrends);
+      resolve(enriched);
     }, 800);
   });
 };
@@ -168,12 +186,10 @@ export const getViralInfoForMenuItem = (menuItem, menuItems = []) => {
   allTrends.forEach(trend => {
     let score = 0;
     const itemName = menuItem.name?.toLowerCase() || '';
-    const itemDesc = menuItem.description?.toLowerCase() || '';
 
     trend.keywords.forEach(keyword => {
       const k = keyword.toLowerCase();
-      if (itemName.includes(k)) score += 30;
-      if (itemDesc.includes(k)) score += 10;
+      if (itemName.includes(k)) score += 50;
     });
 
     if (score > highestScore) {
@@ -182,5 +198,5 @@ export const getViralInfoForMenuItem = (menuItem, menuItems = []) => {
     }
   });
 
-  return highestScore > 10 ? bestTrend : null;
+  return highestScore >= 30 ? bestTrend : null;
 };
