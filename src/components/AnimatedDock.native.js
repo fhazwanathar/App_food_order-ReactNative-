@@ -66,7 +66,7 @@ const DockItem = ({ tab, isActive, onPress, badge }) => {
 
 export default function AnimatedDock({ state, descriptors, navigation, badges = {} }) {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} pointerEvents="box-none">
       <View style={styles.dock}>
         {state.routes.map((route, index) => {
           const tab      = TABS.find(t => t.name === route.name) || TABS[0];
@@ -98,8 +98,8 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
 }
 
 const styles = StyleSheet.create({
-  container:   { position: 'absolute', bottom: 0, left: 0, right: 0, alignItems: 'center', paddingBottom: 12, zIndex: 999 },
-  dock:        { flexDirection: 'row', gap: 10, backgroundColor: 'rgba(10,10,10,0.9)', borderRadius: 22, padding: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  container:   { position: 'absolute', bottom: 25, left: 0, right: 0, alignItems: 'center', zIndex: 999 },
+  dock:        { flexDirection: 'row', gap: 10, backgroundColor: 'rgba(10,10,10,0.9)', borderRadius: 30, padding: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 8 },
   itemWrap:    { alignItems: 'center' },
   item:        { width: 50, height: 50, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.1)', justifyContent: 'center', alignItems: 'center' },
   itemActive:  { backgroundColor: 'rgba(255,99,71,0.25)', borderColor: 'rgba(255,99,71,0.6)' },

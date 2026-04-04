@@ -3,7 +3,8 @@
 // Pure React Native Animated — tidak butuh library tambahan
 
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function AnimatedLogo({ size = 90 }) {
   // ── Animasi plate (piring) ────────────────────────────
@@ -37,10 +38,10 @@ export default function AnimatedLogo({ size = 90 }) {
       }),
     ]).start();
 
-    // 2. Garpu masuk dari kiri bawah setelah piring muncul
+    // 2. Garpu masuk dan berhenti lebih di dalam area piring
     Animated.parallel([
       Animated.spring(forkX, {
-        toValue: 0, friction: 5, delay: 500, useNativeDriver: false,
+        toValue: -16, friction: 6, delay: 500, useNativeDriver: false,
       }),
       Animated.spring(forkY, {
         toValue: 0, friction: 5, delay: 500, useNativeDriver: false,
@@ -50,17 +51,34 @@ export default function AnimatedLogo({ size = 90 }) {
       }),
     ]).start();
 
-    // 3. Pisau masuk dari kanan atas
-    Animated.parallel([
-      Animated.spring(knifeX, {
-        toValue: 0, friction: 5, delay: 650, useNativeDriver: false,
-      }),
-      Animated.spring(knifeY, {
-        toValue: 0, friction: 5, delay: 650, useNativeDriver: false,
-      }),
-      Animated.timing(knifeOpacity, {
-        toValue: 1, duration: 300, delay: 650, useNativeDriver: false,
-      }),
+    // 3. Pisau masuk ke area kanan-tengah piring lalu memulai gerakan memotong estetis
+    Animated.sequence([
+      Animated.parallel([
+        Animated.spring(knifeX, {
+          toValue: 20, friction: 6, delay: 650, useNativeDriver: false,
+        }),
+        Animated.spring(knifeY, {
+          toValue: -18, friction: 6, delay: 650, useNativeDriver: false,
+        }),
+        Animated.timing(knifeOpacity, {
+          toValue: 1, duration: 300, delay: 650, useNativeDriver: false,
+        }),
+      ]),
+      // Gerakan gesekan memotong diagonal ala tangan (Aesthetic Slice)
+      Animated.loop(
+        Animated.sequence([
+          // Tarik mundur-bawah untuk memotong
+          Animated.parallel([
+            Animated.timing(knifeY, { toValue: 8, duration: 300, useNativeDriver: false }),
+            Animated.timing(knifeX, { toValue: 10, duration: 300, useNativeDriver: false }),
+          ]),
+          // Dorong maju-atas kembali ke posisi awal
+          Animated.parallel([
+            Animated.timing(knifeY, { toValue: -18, duration: 350, useNativeDriver: false }),
+            Animated.timing(knifeX, { toValue: 20, duration: 350, useNativeDriver: false }),
+          ]),
+        ])
+      )
     ]).start();
 
     // 4. Glow pulse — loop terus
@@ -131,6 +149,13 @@ export default function AnimatedLogo({ size = 90 }) {
           styles.plateInner2,
           { width: size * 0.45, height: size * 0.45, borderRadius: size * 0.225 }
         ]} />
+        {/* Membawa Makanan ke Tengah Piring */}
+        <Animated.View style={[
+          StyleSheet.absoluteFillObject, 
+          { justifyContent: 'center', alignItems: 'center' }
+        ]}>
+           <MaterialCommunityIcons name="room-service-outline" size={size * 0.45} color="rgba(255,255,255,0.9)" />
+        </Animated.View>
       </Animated.View>
 
       {/* ── Fork (garpu) — miring 45deg, masuk dari kiri bawah ── */}
@@ -140,12 +165,12 @@ export default function AnimatedLogo({ size = 90 }) {
           transform: [
             { translateX: forkX },
             { translateY: forkY },
-            { rotate: '-45deg' },
+            { rotate: '-15deg' },
           ],
           opacity: forkOpacity,
         }
       ]}>
-        <Text style={{ fontSize: size * 0.38, color: '#fff' }}>🍴</Text>
+        <MaterialCommunityIcons name="silverware-fork" size={size * 0.42} color="#fff" />
       </Animated.View>
 
       {/* ── Knife (pisau) — miring 45deg, masuk dari kanan atas ── */}
@@ -155,12 +180,12 @@ export default function AnimatedLogo({ size = 90 }) {
           transform: [
             { translateX: knifeX },
             { translateY: knifeY },
-            { rotate: '45deg' },
+            { rotate: '35deg' },
           ],
           opacity: knifeOpacity,
         }
       ]}>
-        <Text style={{ fontSize: size * 0.32, color: '#fff' }}>🔪</Text>
+        <MaterialCommunityIcons name="knife" size={size * 0.42} color="#fff" />
       </Animated.View>
 
     </View>

@@ -1,6 +1,9 @@
 // src/screens/MenuDetailScreen.js
 // Screen detail menu dengan sistem review + reply realtime dari Supabase
 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import {
   Alert, Animated,
@@ -12,6 +15,7 @@ import {
 } from 'react-native';
 import { supabase } from '../config/supabase';
 import { useApp } from '../context/AppContext';
+import { getViralInfoForMenuItem } from '../services/qdrantService';
 
 // ─── Komponen Reply Item ──────────────────────────────────────
 // Menampilkan satu reply dari user
@@ -284,6 +288,14 @@ const MenuDetailScreen = ({ route }) => {
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [existingReview, setExistingReview] = useState(null);
 
+  // AI Viral Insights
+  const [viralTrend, setViralTrend] = useState(null);
+
+  useEffect(() => {
+    const trend = getViralInfoForMenuItem(item);
+    if (trend) setViralTrend(trend);
+  }, [item.id]);
+
   // Theme colors
   const bg      = isDarkMode ? '#1a1a1a' : '#f5f5f5';
   const card    = isDarkMode ? '#2a2a2a' : '#ffffff';
@@ -420,12 +432,12 @@ const MenuDetailScreen = ({ route }) => {
           <Text style={[styles.description, { color: subText }]}>
             {item.description}
           </Text>
-
+ 
           {/* Rating summary */}
           <View style={[styles.ratingBox, { backgroundColor: bg }]}>
             <Text style={[styles.ratingNum, { color: textCol }]}>{avgRating}</Text>
             <View style={{ flexDirection: 'row', marginBottom: 4 }}>
-              {[1,2,3,4,5].map(s => (
+              {[1, 2, 3, 4, 5].map(s => (
                 <Text key={s} style={{ fontSize: 16 }}>
                   {s <= Math.floor(avgRating) ? '⭐' : '☆'}
                 </Text>
@@ -435,6 +447,38 @@ const MenuDetailScreen = ({ route }) => {
               {reviews.length} ulasan
             </Text>
           </View>
+ 
+          {/* ⚡ AI Viral Insight Card ⚡ */}
+          {viralTrend && (
+            <LinearGradient
+              colors={isDarkMode ? ['#4c1d95', '#1e1b4b'] : ['#f5f3ff', '#ede9fe']}
+              style={styles.viralInsightCard}
+            >
+              <View style={styles.viralInsightHeader}>
+                <View style={styles.aiIconBadge}>
+                  <MaterialCommunityIcons name="brain" size={16} color="#8b5cf6" />
+                </View>
+                <Text style={[styles.viralInsightTitle, { color: isDarkMode ? '#ddd' : '#5b21b6' }]}>
+                  AI Viral Insight
+                </Text>
+              </View>
+              <Text style={[styles.viralInsightDetail, { color: isDarkMode ? '#bbb' : '#4c1d95' }]}>
+                "{viralTrend.description}"
+              </Text>
+              <View style={styles.viralSourceRow}>
+                <Text style={styles.viralSourceTxt}>Sedang Tren di Internet</Text>
+                <MaterialCommunityIcons name="trending-up" size={14} color="#8b5cf6" />
+              </View>
+              
+              <TouchableOpacity 
+                style={styles.viralSourceBtn}
+                onPress={() => WebBrowser.openBrowserAsync(viralTrend.sourceUrl)}
+              >
+                <Text style={styles.viralSourceBtnTxt}>Lihat Insight Lengkap 🌍</Text>
+                <MaterialCommunityIcons name="chevron-right" size={16} color="#fff" />
+              </TouchableOpacity>
+            </LinearGradient>
+          )}
         </View>
 
         {/* Form review */}
@@ -523,6 +567,68 @@ const styles = StyleSheet.create({
   categoryText:     { fontSize: 12, color: '#1976d2', fontWeight: '600' },
   price:            { fontSize: 24, fontWeight: 'bold', color: '#FF6347' },
   description:      { fontSize: 15, lineHeight: 22, marginBottom: 16 },
+
+  // Viral Insight
+  viralInsightCard: {
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(139,92,246,0.3)',
+  },
+  viralInsightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  aiIconBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  viralInsightTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  viralInsightDetail: {
+    fontSize: 13,
+    fontStyle: 'italic',
+    lineHeight: 18,
+    marginBottom: 10,
+  },
+  viralSourceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  viralSourceTxt: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#8b5cf6',
+  },
+  viralSourceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#8b5cf6',
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginTop: 12,
+    gap: 8,
+    elevation: 3,
+  },
+  viralSourceBtnTxt: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+
   ratingBox:        { padding: 16, borderRadius: 12, alignItems: 'center' },
   ratingNum:        { fontSize: 48, fontWeight: 'bold', marginBottom: 4 },
   ratingCount:      { fontSize: 14, marginTop: 4 },

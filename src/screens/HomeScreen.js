@@ -1,21 +1,26 @@
 // src/screens/HomeScreen.js
 // Map: Platform-aware — WebView Leaflet (mobile) / Static image (web)
-// Install: npx expo install react-native-webview expo-location
+// Install: npx expo install react-native-webview expo-location expo-web-browser expo-linear-gradient
 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator, Alert,
   Animated, Dimensions, Image, Platform, ScrollView,
-  StyleSheet, Text, TouchableOpacity, View,
-  TextInput, ActivityIndicator, Alert
+  StyleSheet, Text,
+  TextInput,
+  TouchableOpacity, View
 } from 'react-native';
 import AnimatedLogo from '../components/AnimatedLogo';
 import Aurora from '../components/Aurora';
+import MapComponent from '../components/MapComponent';
+import { GEOAPIFY_KEY } from '../config/maps';
 import { darkTheme, lightTheme } from '../config/theme';
 import { useApp } from '../context/AppContext';
-import MapComponent from '../components/MapComponent';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { GEOAPIFY_KEY } from '../config/maps';
+import { fetchAITrends } from '../services/qdrantService';
 
 const { width } = Dimensions.get('window');
 
@@ -415,6 +420,13 @@ const HomeScreen = ({ navigation }) => {
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeout = useRef(null);
 
+  // AI Trending States
+  const [aiTrends, setAiTrends] = useState([]);
+  const [selectedAICategory, setSelectedAICategory] = useState('food');
+  const [aiLoading, setAiLoading] = useState(false);
+  const aiTranslateY = useRef(new Animated.Value(20)).current;
+  const aiOpacity = useRef(new Animated.Value(0)).current;
+
   // Data Pesanan Fiktif
   const [nearbyOrders] = useState([
     { latitude: userLocation.latitude + 0.002, longitude: userLocation.longitude - 0.003 },
@@ -475,6 +487,34 @@ const HomeScreen = ({ navigation }) => {
       console.error(e);
     } finally {
         setIsSearching(false);
+    }
+  };
+
+  const loadAITrends = async (cat) => {
+    setAiLoading(true);
+    Animated.parallel([
+      Animated.timing(aiTranslateY, { toValue: 20, duration: 200, useNativeDriver: Platform.OS !== 'web' }),
+      Animated.timing(aiOpacity, { toValue: 0, duration: 200, useNativeDriver: Platform.OS !== 'web' }),
+    ]).start(async () => {
+      const data = await fetchAITrends(cat, menuItems);
+      setAiTrends(data);
+      setAiLoading(false);
+      Animated.parallel([
+        Animated.spring(aiTranslateY, { toValue: 0, friction: 5, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(aiOpacity, { toValue: 1, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
+      ]).start();
+    });
+  };
+
+  useEffect(() => {
+    loadAITrends(selectedAICategory);
+  }, [selectedAICategory]);
+
+  const handleOpenBrowse = async (url) => {
+    try {
+      await WebBrowser.openBrowserAsync(url);
+    } catch (e) {
+      Alert.alert('Error', 'Gagal membuka browser.');
     }
   };
 
@@ -559,10 +599,10 @@ const HomeScreen = ({ navigation }) => {
               <Text style={styles.quickStatLbl}>Menu</Text>
             </View>
             <View style={styles.quickStatDivider} />
-            <View style={styles.quickStat}>
+            <TouchableOpacity style={styles.quickStat} onPress={() => navigation.navigate('Cart')}>
               <Text style={styles.quickStatVal}>{cart.length}</Text>
               <Text style={styles.quickStatLbl}>Keranjang</Text>
-            </View>
+            </TouchableOpacity>
             <View style={styles.quickStatDivider} />
             <View style={styles.quickStat}>
               <Text style={styles.quickStatVal}>4</Text>
@@ -686,18 +726,191 @@ const HomeScreen = ({ navigation }) => {
         </ScrollView>
       </View>
 
+      {/* ══ AI TRENDING EXPLORER ══ */}
+      <View style={[styles.aiSection, { backgroundColor: card }]}>
+        <LinearGradient
+          colors={isDarkMode ? ['#1e1b4b', '#312e81'] : ['#f5f3ff', '#ede9fe']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.aiHeaderGradient}
+        >
+          <View style={styles.aiHeader}>
+            <View style={styles.aiTitleRow}>
+              <View style={styles.aiIconCircle}>
+                <MaterialCommunityIcons name="brain" size={20} color="#8b5cf6" />
+              </View>
+              <View>
+                <Text style={[styles.aiSectionTitle, { color: textCol }]}>AI Trending Explorer</Text>
+                <Text style={styles.aiSectionSub}>Prediksi kuliner viral dari internet</Text>
+              </View>
+            </View>
+            <View style={styles.aiGlowDot} />
+          </View>
+
+          <View style={styles.aiCategoryRow}>
+            {[
+              { id: 'food', label: 'Makanan', icon: 'food-variant' },
+              { id: 'drink', label: 'Minuman', icon: 'cup-water' },
+              { id: 'snack', label: 'Jajanan', icon: 'cookie' },
+            ].map((cat) => (
+              <TouchableOpacity
+                key={cat.id}
+                onPress={() => setSelectedAICategory(cat.id)}
+                style={[
+                  styles.aiCatTab,
+                  selectedAICategory === cat.id && { backgroundColor: isDarkMode ? '#4c1d95' : '#8b5cf6' }
+                ]}
+              >
+                <MaterialCommunityIcons 
+                  name={cat.icon} 
+                  size={16} 
+                  color={selectedAICategory === cat.id ? '#fff' : (isDarkMode ? '#888' : '#666')} 
+                />
+                <Text style={[
+                  styles.aiCatText,
+                  { color: selectedAICategory === cat.id ? '#fff' : (isDarkMode ? '#888' : '#666') }
+                ]}>
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </LinearGradient>
+
+        <View style={styles.aiContent}>
+          {aiLoading ? (
+            <View style={styles.aiLoader}>
+              <ActivityIndicator color="#8b5cf6" />
+            </View>
+          ) : (
+            <Animated.View style={{ opacity: aiOpacity, transform: [{ translateY: aiTranslateY }] }}>
+              {aiTrends.map((trend) => (
+                <TouchableOpacity 
+                  key={trend.id} 
+                  style={[styles.aiTrendCard, { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' }]}
+                  onPress={() => handleOpenBrowse(trend.sourceUrl)}
+                  activeOpacity={0.9}
+                >
+                  <Image source={{ uri: trend.image }} style={styles.aiTrendImg} />
+                  <View style={styles.aiTrendInfo}>
+                    <View style={styles.aiTrendTag}>
+                      <Text style={styles.aiTrendTagTxt}>🔥 HOT MATCH {trend.matchScore}%</Text>
+                    </View>
+                    <Text style={[styles.aiTrendTitle, { color: textCol }]}>{trend.title}</Text>
+                    <Text style={styles.aiTrendDesc} numberOfLines={2}>{trend.description}</Text>
+                    
+                    {trend.matchedMenu && (
+                      <View style={styles.aiMatchBox}>
+                        <Text style={styles.aiMatchLabel}>Cocok dengan menu:</Text>
+                        <Text style={[styles.aiMatchName, { color: textCol }]}>{trend.matchedMenu.name}</Text>
+                        <TouchableOpacity 
+                          style={styles.aiAddBtn}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            addToCart(trend.matchedMenu);
+                          }}
+                        >
+                          <MaterialCommunityIcons name="cart-plus" size={16} color="#fff" />
+                          <Text style={styles.aiAddBtnTxt}>Tambah ke Keranjang</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    <View style={styles.aiTrendFooter}>
+                      <Text style={styles.aiBrowseBtn}>🌍 Browse Sumber Tren</Text>
+                      <MaterialCommunityIcons name="open-in-new" size={14} color="#8b5cf6" />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </Animated.View>
+          )}
+        </View>
+      </View>
+
+      {/* ══ VIRAL SPOTLIGHT (Multi AI Comparison) ══ */}
+      {aiTrends.length > 0 && (
+        <View style={styles.spotlightSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: textCol }]}>🎭 Viral Comparison Spotlight</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.spotlightScroll}>
+            {aiTrends.filter(t => t.matchedMenu).slice(0, 3).map((trend, index) => (
+              <LinearGradient
+                key={trend.id}
+                colors={isDarkMode ? ['#312e81', '#1e1b4b'] : ['#eff6ff', '#dbeafe']}
+                style={styles.spotlightCard}
+              >
+                <View style={styles.spotlightHeader}>
+                  <View style={styles.spotlightRank}>
+                    <Text style={styles.spotlightRankText}>#{index + 1}</Text>
+                  </View>
+                  <Text style={[styles.spotlightTitle, { color: isDarkMode ? '#fff' : '#1e3a8a' }]}>
+                    {trend.title}
+                  </Text>
+                </View>
+                
+                <View style={styles.comparisonRow}>
+                  <View style={styles.comparisonCol}>
+                    <View style={styles.compImgWrap}>
+                      <Image 
+                        source={{ uri: trend.image }} 
+                        style={styles.compImg}
+                        defaultSource={require('../../assets/images/icon.png')} // Fallback jika blank
+                      />
+                      <View style={styles.compBadgeInternet}>
+                        <Text style={styles.compBadgeTxt}>INTERNET</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={styles.vsCircle}>
+                    <Text style={styles.vsTxt}>VS</Text>
+                  </View>
+
+                  <View style={styles.comparisonCol}>
+                    <View style={styles.compImgWrap}>
+                      <Image source={{ uri: trend.matchedMenu.image }} style={styles.compImg} />
+                      <View style={styles.compBadgeLocal}>
+                        <Text style={styles.compBadgeTxt}>MENU KITA</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.spotlightFooter}>
+                  <Text style={[styles.spotlightMatch, { color: '#8b5cf6' }]}>Kecocokan {trend.matchScore}%</Text>
+                  <TouchableOpacity 
+                    style={styles.spotlightBtn}
+                    onPress={() => navigation.navigate('Menu', { 
+                      screen: 'MenuDetail', 
+                      params: { item: trend.matchedMenu } 
+                    })}
+                  >
+                    <Text style={styles.spotlightBtnTxt}>Cek Menu →</Text>
+                  </TouchableOpacity>
+                </View>
+              </LinearGradient>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
       {/* ══ PROMO BANNER ══ */}
-      <View style={styles.promoBanner}>
+      <TouchableOpacity 
+        style={styles.promoBanner}
+        onPress={() => navigation.navigate('PromoHub')}
+      >
         <View style={styles.promoBg} />
         <Text style={styles.promoEmoji}>🎉</Text>
         <View>
           <Text style={styles.promoTitle}>Gratis Ongkir!</Text>
           <Text style={styles.promoSub}>Untuk semua pesanan hari ini</Text>
         </View>
-        <TouchableOpacity style={styles.promoBtn} onPress={() => navigation.navigate('Menu')}>
+        <View style={styles.promoBtn}>
           <Text style={styles.promoBtnTxt}>Pesan →</Text>
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
 
       <View style={{ height: 30 }} />
     </ScrollView>
@@ -804,6 +1017,35 @@ const styles = StyleSheet.create({
   storeRatingBadge: { backgroundColor: 'rgba(255,99,71,0.8)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
   storeRating:      { fontSize: 10, color: '#fff', fontWeight: 'bold' },
 
+  // AI Section Styles
+  aiSection: { marginHorizontal: 16, marginBottom: 14, borderRadius: 20, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 },
+  aiHeaderGradient: { padding: 16 },
+  aiHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  aiTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  aiIconCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', elevation: 2 },
+  aiSectionTitle: { fontSize: 13, fontWeight: '900', letterSpacing: 0.5 },
+  aiSectionSub: { fontSize: 9, color: '#888', marginTop: 2 },
+  aiGlowDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#8b5cf6', shadowColor: '#8b5cf6', shadowRadius: 10, shadowOpacity: 1, elevation: 5 },
+  aiCategoryRow: { flexDirection: 'row', gap: 10 },
+  aiCatTab: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 15, gap: 6, backgroundColor: 'rgba(0,0,0,0.05)' },
+  aiCatText: { fontSize: 12, fontWeight: '700' },
+  aiContent: { padding: 16, paddingTop: 10 },
+  aiLoader: { padding: 40, alignItems: 'center' },
+  aiTrendCard: { flexDirection: 'row', borderRadius: 16, overflow: 'hidden', marginBottom: 12, elevation: 3, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5 },
+  aiTrendImg: { width: 100, height: 120 },
+  aiTrendInfo: { flex: 1, padding: 12 },
+  aiTrendTag: { alignSelf: 'flex-start', backgroundColor: '#8b5cf615', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, marginBottom: 6 },
+  aiTrendTagTxt: { fontSize: 9, fontWeight: '900', color: '#8b5cf6' },
+  aiTrendTitle: { fontSize: 15, fontWeight: '800', marginBottom: 4 },
+  aiTrendDesc: { fontSize: 11, color: '#666', lineHeight: 16 },
+  aiMatchBox: { marginTop: 10, padding: 8, backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: 10, borderLeftWidth: 3, borderLeftColor: '#8b5cf6' },
+  aiMatchLabel: { fontSize: 9, fontWeight: '700', color: '#8b5cf6', marginBottom: 2 },
+  aiMatchName: { fontSize: 12, fontWeight: '800', marginBottom: 6 },
+  aiAddBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#8b5cf6', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, gap: 6, alignSelf: 'flex-start' },
+  aiAddBtnTxt: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
+  aiTrendFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
+  aiBrowseBtn: { fontSize: 11, fontWeight: '700', color: '#8b5cf6' },
+
   // Promo Banner
   promoBanner:      { marginHorizontal: 16, marginBottom: 14, borderRadius: 20, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 12, overflow: 'hidden', position: 'relative' },
   promoBg:          { ...StyleSheet.absoluteFillObject, backgroundColor: '#1a1a2e' },
@@ -812,6 +1054,28 @@ const styles = StyleSheet.create({
   promoSub:         { fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 2 },
   promoBtn:         { marginLeft: 'auto', backgroundColor: '#FF6347', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 },
   promoBtnTxt:      { color: '#fff', fontWeight: '800', fontSize: 13 },
+
+  // Spotlight Section
+  spotlightSection: { marginHorizontal: 16, marginBottom: 14 },
+  spotlightScroll:  { marginHorizontal: -16, paddingLeft: 16 },
+  spotlightCard:    { width: width * 0.75, borderRadius: 24, padding: 16, marginRight: 16, borderWidth: 1, borderColor: '#8b5cf630' },
+  spotlightHeader:  { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  spotlightRank:    { width: 24, height: 24, borderRadius: 12, backgroundColor: '#8b5cf6', justifyContent: 'center', alignItems: 'center' },
+  spotlightRankText:{ color: '#fff', fontSize: 10, fontWeight: 'bold' },
+  spotlightTitle:   { fontSize: 12, fontWeight: '900', textTransform: 'uppercase', flex: 1 },
+  comparisonRow:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  comparisonCol:    { width: '42%' },
+  compImgWrap:      { width: '100%', height: 80, borderRadius: 12, overflow: 'hidden', position: 'relative' },
+  compImg:          { width: '100%', height: '100%' },
+  compBadgeInternet:{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.6)', paddingVertical: 2 },
+  compBadgeLocal:   { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(139,92,246,0.8)', paddingVertical: 2 },
+  compBadgeTxt:     { color: '#fff', fontSize: 7, fontWeight: '900', textAlign: 'center' },
+  vsCircle:         { width: 28, height: 28, borderRadius: 14, backgroundColor: '#8b5cf6', justifyContent: 'center', alignItems: 'center', zIndex: 5 },
+  vsTxt:            { color: '#fff', fontSize: 10, fontWeight: '900' },
+  spotlightFooter:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  spotlightMatch:   { fontSize: 10, fontWeight: '800' },
+  spotlightBtn:     { backgroundColor: '#8b5cf6', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  spotlightBtnTxt:  { color: '#fff', fontSize: 10, fontWeight: 'bold' },
 });
 
 export default HomeScreen;
