@@ -161,7 +161,7 @@ const DeliveryTrackerScreen = ({ route, navigation }) => {
         <MaterialCommunityIcons name="arrow-left" size={24} color="#fff" />
       </TouchableOpacity>
 
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 110 }}>
 
         {/* Guard Logic: Hanya tampilkan card jika tab AKTIF sesuai dengan status SIMULASI */}
         {(activeTab === 'Untuk dikirim' && isPreparing) ||

@@ -33,7 +33,7 @@ const InvoiceScreen = ({ navigation, route }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 110 }}>
         {/* Success Header with Animated Logo */}
         <View style={styles.successHeader}>
           <Animated.View style={[styles.logoContainer, { transform: [{ translateX: slideAnim }] }]}>

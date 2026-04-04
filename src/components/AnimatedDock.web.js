@@ -154,12 +154,12 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
-        paddingBottom: 24, // Ditingkatkan agar tidak terpotong browser UI mobile
         position: 'fixed',
-        bottom: 0,
+        bottom: 25,
         left: 0,
         right: 0,
         zIndex: 999,
+        pointerEvents: 'none',
       }}
     >
       <motion.div
@@ -171,11 +171,10 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
           alignItems: 'center',
           gap: 12,
           backgroundColor: '#fff',
-          borderTop: '1px solid #e0e0e0',
-          borderRadius: 0,
-          padding: '8px 12px',
-          boxShadow: '0 -2px 6px rgba(0,0,0,0.1)',
-          pointerEvents: 'all',
+          borderRadius: 30,
+          padding: '10px 16px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
+          pointerEvents: 'auto',
         }}
       >
         {state.routes.map((route, index) => {

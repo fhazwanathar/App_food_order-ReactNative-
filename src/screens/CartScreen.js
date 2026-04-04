@@ -299,6 +299,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: '#fff',
     padding: 20,
+    paddingBottom: 110,
     borderTopWidth: 1,
     borderTopColor: '#eee',
     shadowColor: '#000',

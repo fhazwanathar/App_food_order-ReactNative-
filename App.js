@@ -54,6 +54,7 @@ const creativeTransition = {
           inputRange: [0, 1],
           outputRange: [0, 1],
         }),
+        overflow: 'hidden',
       },
       overlayStyle: {
         opacity: current.progress.interpolate({
@@ -72,6 +73,7 @@ const fadeTransition = {
         inputRange: [0, 1],
         outputRange: [0, 1],
       }),
+      overflow: 'hidden',
     },
   }),
 };
@@ -210,7 +212,9 @@ function AppContent() {
 export default function App() {
   return (
     <AppProvider>
-      <AppContent />
+      <View style={{ flex: 1, overflow: 'hidden' }}>
+        <AppContent />
+      </View>
     </AppProvider>
   );
 }
