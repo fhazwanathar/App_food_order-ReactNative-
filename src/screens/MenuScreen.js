@@ -10,6 +10,7 @@ import {
 import SuccessAnimation from '../components/SuccessAnimation';
 import { darkTheme, lightTheme } from '../config/theme';
 import { useApp } from '../context/AppContext';
+import { fetchAITrends } from '../services/qdrantService';
 
 const COL_GAP   = 10;
 const PADDING    = 14;
@@ -88,6 +89,11 @@ const PinCard = ({ item, theme, onAddToCart, onToggleFavorite, onPress, isFavori
 
         {/* Body */}
         <View style={styles.pinBody}>
+          {item.isViral && (
+            <View style={styles.viralBadge}>
+              <Text style={styles.viralBadgeTxt}>⚡ Viral Sekarang</Text>
+            </View>
+          )}
           <Text style={[styles.pinName, { color: theme.text }]} numberOfLines={2}>{item.name}</Text>
           <Text style={[styles.pinDesc, { color: theme.textSecondary }]} numberOfLines={2}>{item.description}</Text>
           <View style={styles.pinFooter}>
@@ -254,6 +260,26 @@ const MenuScreen = ({ navigation }) => {
   const [particles, setParticles]                         = useState([]);
   const successScale = useRef(new Animated.Value(0)).current;
 
+  // AI Trending Data
+  const [viralItems, setViralItems] = useState([]);
+
+  useEffect(() => {
+    const loadViral = async () => {
+      // Ambil semua kategori tren untuk pencocokan global
+      const [f, d, s] = await Promise.all([
+        fetchAITrends('food', menuItems),
+        fetchAITrends('drink', menuItems),
+        fetchAITrends('snack', menuItems)
+      ]);
+      const allTrends = [...f, ...d, ...s];
+      const matchedIds = allTrends
+        .filter(t => t.matchedMenu)
+        .map(t => t.matchedMenu.id);
+      setViralItems(matchedIds);
+    };
+    if (menuItems.length > 0) loadViral();
+  }, [menuItems]);
+
   const triggerSuccess = () => {
     setShowSuccessAnimation(true);
     Animated.sequence([
@@ -290,6 +316,7 @@ const MenuScreen = ({ navigation }) => {
       i.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
     if (showFavoritesOnly) result = result.filter(i => favorites.includes(i.id));
+    
     switch (sortBy) {
       case 'name-asc':    result.sort((a, b) => a.name?.localeCompare(b.name)); break;
       case 'name-desc':   result.sort((a, b) => b.name?.localeCompare(a.name)); break;
@@ -297,8 +324,12 @@ const MenuScreen = ({ navigation }) => {
       case 'price-desc':  result.sort((a, b) => b.price - a.price); break;
       case 'rating-desc': result.sort((a, b) => b.rating - a.rating); break;
     }
-    return result;
-  }, [selectedCategory, searchQuery, sortBy, showFavoritesOnly, favorites, menuItems]);
+
+    return result.map(item => ({
+      ...item,
+      isViral: viralItems.includes(item.id)
+    }));
+  }, [selectedCategory, searchQuery, sortBy, showFavoritesOnly, favorites, menuItems, viralItems]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -498,6 +529,24 @@ const styles = StyleSheet.create({
   successOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
   successCard:    { backgroundColor: '#fff', padding: 24, borderRadius: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 },
   successTxt:     { fontSize: 14, fontWeight: 'bold', color: '#333', marginTop: 8 },
+
+  // Viral Badge
+  viralBadge: {
+    backgroundColor: '#FFD70020',
+    borderColor: '#FFD700',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  viralBadgeTxt: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: '#D4AF37',
+    textTransform: 'uppercase',
+  },
 });
 
 export default MenuScreen;

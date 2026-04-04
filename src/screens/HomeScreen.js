@@ -496,7 +496,7 @@ const HomeScreen = ({ navigation }) => {
       Animated.timing(aiTranslateY, { toValue: 20, duration: 200, useNativeDriver: Platform.OS !== 'web' }),
       Animated.timing(aiOpacity, { toValue: 0, duration: 200, useNativeDriver: Platform.OS !== 'web' }),
     ]).start(async () => {
-      const data = await fetchAITrends(cat);
+      const data = await fetchAITrends(cat, menuItems);
       setAiTrends(data);
       setAiLoading(false);
       Animated.parallel([
@@ -798,6 +798,24 @@ const HomeScreen = ({ navigation }) => {
                     </View>
                     <Text style={[styles.aiTrendTitle, { color: textCol }]}>{trend.title}</Text>
                     <Text style={styles.aiTrendDesc} numberOfLines={2}>{trend.description}</Text>
+                    
+                    {trend.matchedMenu && (
+                      <View style={styles.aiMatchBox}>
+                        <Text style={styles.aiMatchLabel}>Cocok dengan menu:</Text>
+                        <Text style={[styles.aiMatchName, { color: textCol }]}>{trend.matchedMenu.name}</Text>
+                        <TouchableOpacity 
+                          style={styles.aiAddBtn}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            addToCart(trend.matchedMenu);
+                          }}
+                        >
+                          <MaterialCommunityIcons name="cart-plus" size={16} color="#fff" />
+                          <Text style={styles.aiAddBtnTxt}>Tambah ke Keranjang</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
                     <View style={styles.aiTrendFooter}>
                       <Text style={styles.aiBrowseBtn}>🌍 Browse Sumber Tren</Text>
                       <MaterialCommunityIcons name="open-in-new" size={14} color="#8b5cf6" />
@@ -949,6 +967,11 @@ const styles = StyleSheet.create({
   aiTrendTagTxt: { fontSize: 9, fontWeight: '900', color: '#8b5cf6' },
   aiTrendTitle: { fontSize: 15, fontWeight: '800', marginBottom: 4 },
   aiTrendDesc: { fontSize: 11, color: '#666', lineHeight: 16 },
+  aiMatchBox: { marginTop: 10, padding: 8, backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: 10, borderLeftWidth: 3, borderLeftColor: '#8b5cf6' },
+  aiMatchLabel: { fontSize: 9, fontWeight: '700', color: '#8b5cf6', marginBottom: 2 },
+  aiMatchName: { fontSize: 12, fontWeight: '800', marginBottom: 6 },
+  aiAddBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#8b5cf6', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, gap: 6, alignSelf: 'flex-start' },
+  aiAddBtnTxt: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
   aiTrendFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
   aiBrowseBtn: { fontSize: 11, fontWeight: '700', color: '#8b5cf6' },
 
