@@ -154,7 +154,11 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
-        paddingBottom: 10,
+        paddingBottom: 24, // Ditingkatkan agar tidak terpotong browser UI mobile
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
         zIndex: 999,
       }}
     >

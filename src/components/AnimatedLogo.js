@@ -37,10 +37,10 @@ export default function AnimatedLogo({ size = 90 }) {
       }),
     ]).start();
 
-    // 2. Garpu masuk dari kiri bawah setelah piring muncul
+    // 2. Garpu masuk dan berhenti di kiri piring
     Animated.parallel([
       Animated.spring(forkX, {
-        toValue: 0, friction: 5, delay: 500, useNativeDriver: false,
+        toValue: -32, friction: 5, delay: 500, useNativeDriver: false,
       }),
       Animated.spring(forkY, {
         toValue: 0, friction: 5, delay: 500, useNativeDriver: false,
@@ -50,17 +50,26 @@ export default function AnimatedLogo({ size = 90 }) {
       }),
     ]).start();
 
-    // 3. Pisau masuk dari kanan atas
-    Animated.parallel([
-      Animated.spring(knifeX, {
-        toValue: 0, friction: 5, delay: 650, useNativeDriver: false,
-      }),
-      Animated.spring(knifeY, {
-        toValue: 0, friction: 5, delay: 650, useNativeDriver: false,
-      }),
-      Animated.timing(knifeOpacity, {
-        toValue: 1, duration: 300, delay: 650, useNativeDriver: false,
-      }),
+    // 3. Pisau masuk ke area kanan piring lalu memulai gerakan memotong
+    Animated.sequence([
+      Animated.parallel([
+        Animated.spring(knifeX, {
+          toValue: 32, friction: 5, delay: 650, useNativeDriver: false,
+        }),
+        Animated.spring(knifeY, {
+          toValue: -15, friction: 5, delay: 650, useNativeDriver: false,
+        }),
+        Animated.timing(knifeOpacity, {
+          toValue: 1, duration: 300, delay: 650, useNativeDriver: false,
+        }),
+      ]),
+      // Gerakan memotong loop
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(knifeY, { toValue: 15, duration: 350, useNativeDriver: false }),
+          Animated.timing(knifeY, { toValue: -15, duration: 300, useNativeDriver: false }),
+        ])
+      )
     ]).start();
 
     // 4. Glow pulse — loop terus
@@ -140,7 +149,7 @@ export default function AnimatedLogo({ size = 90 }) {
           transform: [
             { translateX: forkX },
             { translateY: forkY },
-            { rotate: '-45deg' },
+            { rotate: '-25deg' },
           ],
           opacity: forkOpacity,
         }
@@ -155,7 +164,7 @@ export default function AnimatedLogo({ size = 90 }) {
           transform: [
             { translateX: knifeX },
             { translateY: knifeY },
-            { rotate: '45deg' },
+            { rotate: '25deg' },
           ],
           opacity: knifeOpacity,
         }

@@ -274,7 +274,11 @@ const DeliveryTrackerScreen = ({ route, navigation }) => {
           <Text style={[styles.recomTitle, { color: textPrimary }]}>Mungkin Anda suka ini</Text>
           <View style={styles.recomGrid}>
             {recommendations.map(item => (
-              <TouchableOpacity key={item.id} style={[styles.recomCard, { backgroundColor: cardBg }]}>
+              <TouchableOpacity 
+                key={item.id} 
+                style={[styles.recomCard, { backgroundColor: cardBg }]}
+                onPress={() => navigation.navigate('Menu', { screen: 'MenuDetail', params: { item } })}
+              >
                 <Image source={{ uri: item.image }} style={styles.recomImage} />
                 <View style={{ padding: 10 }}>
                   <Text style={[styles.recomName, { color: textPrimary }]} numberOfLines={1}>{item.name}</Text>

@@ -13,7 +13,7 @@ import { processEWalletPayment } from '../services/eWallet';
 import PinInputModal from '../components/PinInputModal';
 
 const PaymentScreen = ({ navigation, route }) => {
-  const { total } = route.params;
+  const { total: originalTotal } = route.params;
   const { isDarkMode, cart, saveOrder, userLocation } = useApp();
   const bg = isDarkMode ? '#0a0a0a' : '#f5f5f5';
   const card = isDarkMode ? '#161616' : '#ffffff';
@@ -28,6 +28,40 @@ const PaymentScreen = ({ navigation, route }) => {
   const [isProcessing, setIsProcessing]         = useState(false);
   const [showPinModal, setShowPinModal]         = useState(false);
   const [walletType, setWalletType]             = useState(null);
+
+  // ── Coupon Logic ──
+  const [couponCode, setCouponCode]             = useState('');
+  const [isCouponApplied, setIsCouponApplied]   = useState(false);
+  const [discountPercent, setDiscountPercent]   = useState(0);
+  const [couponMessage, setCouponMessage]       = useState('');
+
+  const finalTotal = originalTotal - (originalTotal * discountPercent);
+
+  const handleApplyCoupon = () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return;
+    
+    if (code === 'PROMO40' || code === 'VIRAL40' || code === 'DISKON40') {
+      setDiscountPercent(0.40);
+      setIsCouponApplied(true);
+      setCouponMessage('🎉 Kupon diterapkan! Kamu hemat 40%');
+    } else if (code === 'GRATISONGKIR') {
+      setDiscountPercent(0.15); // Diskon subsidi 15%
+      setIsCouponApplied(true);
+      setCouponMessage('🎉 Subsidi Ongkir (15%) diterapkan!');
+    } else {
+      setDiscountPercent(0);
+      setIsCouponApplied(false);
+      setCouponMessage('❌ Kode promo tidak valid atau kadaluarsa.');
+    }
+  };
+
+  const handleCancelCoupon = () => {
+    setCouponCode('');
+    setDiscountPercent(0);
+    setIsCouponApplied(false);
+    setCouponMessage('');
+  };
 
   // ── Countdown state ──────────────────────────────────────
   const [showCountdown, setShowCountdown] = useState(false);
@@ -110,7 +144,7 @@ const PaymentScreen = ({ navigation, route }) => {
     const orderNum = `ORD${Date.now().toString().slice(-8)}`;
 
     try {
-      await processEWalletPayment(walletType, total, orderNum, pin);
+      await processEWalletPayment(walletType, finalTotal, orderNum, pin);
       processFinalOrder(orderNum);
     } catch (err) {
       Alert.alert('Pembayaran Gagal', err.message || 'Terjadi kesalahan sistem.');
@@ -124,7 +158,9 @@ const PaymentScreen = ({ navigation, route }) => {
       id: Date.now(),
       orderNumber: orderNum,
       items: [...cart],
-      total,
+      total: finalTotal,
+      originalTotal: originalTotal,
+      discount: originalTotal * discountPercent,
       customerName,
       phoneNumber,
       deliveryAddress,
@@ -146,7 +182,7 @@ const PaymentScreen = ({ navigation, route }) => {
     const isGatewayMethod = ['transfer', 'qris'].includes(selectedPayment);
 
     if (isGatewayMethod) {
-      navigation.navigate('Gateway', { total, orderData: savedOrder });
+      navigation.navigate('Gateway', { total: finalTotal, orderData: savedOrder });
     } else {
       navigation.navigate('Invoice', { order: savedOrder });
     }
@@ -174,6 +210,31 @@ const PaymentScreen = ({ navigation, route }) => {
         </View>
 
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🎟️ Kode Kupon / Promo</Text>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <TextInput 
+              style={[styles.input, { flex: 1, textTransform: 'uppercase' }]} 
+              placeholder="Masukkan kode (mis. PROMO40)" 
+              value={couponCode} 
+              onChangeText={setCouponCode} 
+              editable={!isCouponApplied} 
+            />
+            {!isCouponApplied ? (
+              <TouchableOpacity style={styles.applyCouponBtn} onPress={handleApplyCoupon}>
+                <Text style={styles.applyCouponTxt}>Pakai</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={[styles.applyCouponBtn, { backgroundColor: '#e74c3c' }]} onPress={handleCancelCoupon}>
+                <Text style={styles.applyCouponTxt}>Batal</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          {couponMessage ? (
+              <Text style={{ color: isCouponApplied ? '#2ecc71' : '#e74c3c', marginTop: 8, fontSize: 13, fontWeight: 'bold' }}>{couponMessage}</Text>
+          ) : null}
+        </View>
+
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>💳 Pilih Metode Pembayaran *</Text>
           {paymentMethods.map(method => (
             <TouchableOpacity key={method.id} style={[styles.paymentCard, selectedPayment === method.id && styles.paymentCardSelected]} onPress={() => setSelectedPayment(method.id)}>
@@ -194,10 +255,16 @@ const PaymentScreen = ({ navigation, route }) => {
         <View style={styles.summarySection}>
           <Text style={styles.summaryTitle}>Ringkasan Pesanan</Text>
           <View style={styles.summaryRow}><Text style={styles.summaryLabel}>Jumlah Item:</Text><Text style={styles.summaryValue}>{cart.length} item</Text></View>
-          <View style={styles.summaryRow}><Text style={styles.summaryLabel}>Total Pesanan:</Text><Text style={styles.summaryValue}>Rp {total.toLocaleString('id-ID')}</Text></View>
+          <View style={styles.summaryRow}><Text style={styles.summaryLabel}>Total Pesanan:</Text><Text style={styles.summaryValue}>Rp {originalTotal.toLocaleString('id-ID')}</Text></View>
           <View style={styles.summaryRow}><Text style={styles.summaryLabel}>Biaya Pengiriman:</Text><Text style={styles.summaryValue}>GRATIS</Text></View>
+          {isCouponApplied && (
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryLabel, {color: '#2ecc71', fontWeight: 'bold'}]}>Diskon Kupon:</Text>
+              <Text style={[styles.summaryValue, {color: '#2ecc71', fontWeight: 'bold'}]}>- Rp {(originalTotal * discountPercent).toLocaleString('id-ID')}</Text>
+            </View>
+          )}
           <View style={styles.divider} />
-          <View style={styles.summaryRow}><Text style={styles.totalLabel}>Total Bayar:</Text><Text style={styles.totalValue}>Rp {total.toLocaleString('id-ID')}</Text></View>
+          <View style={styles.summaryRow}><Text style={styles.totalLabel}>Total Bayar:</Text><Text style={styles.totalValue}>Rp {finalTotal.toLocaleString('id-ID')}</Text></View>
         </View>
 
         <TouchableOpacity style={styles.payButton} onPress={handlePayment} disabled={isProcessing}>
@@ -253,6 +320,9 @@ const styles = StyleSheet.create({
   countdownDots:        { flexDirection: 'row', marginTop: 20, gap: 8 },
   countdownDot:         { width: 12, height: 12, borderRadius: 6 },
   countdownSub:         { fontSize: 13, color: '#999', marginTop: 16 },
+  // Kupon
+  applyCouponBtn:       { backgroundColor: '#2ecc71', paddingHorizontal: 20, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  applyCouponTxt:       { color: '#fff', fontWeight: 'bold', fontSize: 14 }
 });
 
 export default PaymentScreen;
