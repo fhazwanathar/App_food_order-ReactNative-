@@ -18,7 +18,7 @@ export const createDokuTransaction = async (orderData) => {
       order: {
         invoice_number: `INV-${orderData.orderNumber || Date.now()}`,
         amount: orderData.total,
-        callback_url: 'https://foods-streets.vercel.app/payment-finish', // Ganti ke URL Anda
+        callback_url: 'https://foods-streets.vercel.app/payment-finish', 
         line_items: orderData.items.map(item => ({
           name: item.name,
           price: item.price,
@@ -30,8 +30,8 @@ export const createDokuTransaction = async (orderData) => {
       },
       customer: {
         id: orderData.userId || 'GUEST',
-        name: orderData.customerName || 'Pelanggan FoodStreets',
-        email: orderData.customerEmail || 'test@example.com'
+        name: orderData.customerName || 'Pelanggan',
+        email: orderData.customerEmail || 'customer@example.com'
       }
     };
 
@@ -40,6 +40,7 @@ export const createDokuTransaction = async (orderData) => {
     const digest = CryptoJS.enc.Base64.stringify(CryptoJS.SHA256(bodyString));
 
     // 3. Hitung Signature (HMAC-SHA256 dari Header + Digest)
+    // PENTING: Ikuti urutan persis sesuai spek DOKU
     const signaturePayload = 
       `Client-Id:${DOKU_CONFIG.CLIENT_ID}\n` +
       `Request-Id:${requestId}\n` +
@@ -52,8 +53,6 @@ export const createDokuTransaction = async (orderData) => {
     );
 
     // 4. Kirim Request ke DOKU
-    console.log('[DOKU] Sending Request to:', DOKU_CONFIG.BASE_URL + targetPath);
-    
     const response = await fetch(DOKU_CONFIG.BASE_URL + targetPath, {
       method: 'POST',
       headers: {
