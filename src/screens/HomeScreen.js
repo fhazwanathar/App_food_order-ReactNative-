@@ -1,8 +1,10 @@
 // src/screens/HomeScreen.js
 // Map: Platform-aware — WebView Leaflet (mobile) / Static image (web)
-// Install: npx expo install react-native-webview expo-location
+// Install: npx expo install react-native-webview expo-location expo-web-browser expo-linear-gradient
 
 import * as Location from 'expo-location';
+import * as WebBrowser from 'expo-web-browser';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import {
   Animated, Dimensions, Image, Platform, ScrollView,
@@ -16,6 +18,7 @@ import { useApp } from '../context/AppContext';
 import MapComponent from '../components/MapComponent';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { GEOAPIFY_KEY } from '../config/maps';
+import { fetchAITrends } from '../services/qdrantService';
 
 const { width } = Dimensions.get('window');
 
@@ -415,6 +418,13 @@ const HomeScreen = ({ navigation }) => {
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeout = useRef(null);
 
+  // AI Trending States
+  const [aiTrends, setAiTrends] = useState([]);
+  const [selectedAICategory, setSelectedAICategory] = useState('food');
+  const [aiLoading, setAiLoading] = useState(false);
+  const aiTranslateY = useRef(new Animated.Value(20)).current;
+  const aiOpacity = useRef(new Animated.Value(0)).current;
+
   // Data Pesanan Fiktif
   const [nearbyOrders] = useState([
     { latitude: userLocation.latitude + 0.002, longitude: userLocation.longitude - 0.003 },
@@ -475,6 +485,34 @@ const HomeScreen = ({ navigation }) => {
       console.error(e);
     } finally {
         setIsSearching(false);
+    }
+  };
+
+  const loadAITrends = async (cat) => {
+    setAiLoading(true);
+    Animated.parallel([
+      Animated.timing(aiTranslateY, { toValue: 20, duration: 200, useNativeDriver: Platform.OS !== 'web' }),
+      Animated.timing(aiOpacity, { toValue: 0, duration: 200, useNativeDriver: Platform.OS !== 'web' }),
+    ]).start(async () => {
+      const data = await fetchAITrends(cat);
+      setAiTrends(data);
+      setAiLoading(false);
+      Animated.parallel([
+        Animated.spring(aiTranslateY, { toValue: 0, friction: 5, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(aiOpacity, { toValue: 1, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
+      ]).start();
+    });
+  };
+
+  useEffect(() => {
+    loadAITrends(selectedAICategory);
+  }, [selectedAICategory]);
+
+  const handleOpenBrowse = async (url) => {
+    try {
+      await WebBrowser.openBrowserAsync(url);
+    } catch (e) {
+      Alert.alert('Error', 'Gagal membuka browser.');
     }
   };
 
@@ -686,6 +724,90 @@ const HomeScreen = ({ navigation }) => {
         </ScrollView>
       </View>
 
+      {/* ══ AI TRENDING EXPLORER ══ */}
+      <View style={[styles.aiSection, { backgroundColor: card }]}>
+        <LinearGradient
+          colors={isDarkMode ? ['#1e1b4b', '#312e81'] : ['#f5f3ff', '#ede9fe']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.aiHeaderGradient}
+        >
+          <View style={styles.aiHeader}>
+            <View style={styles.aiTitleRow}>
+              <View style={styles.aiIconCircle}>
+                <MaterialCommunityIcons name="brain" size={20} color="#8b5cf6" />
+              </View>
+              <View>
+                <Text style={[styles.aiSectionTitle, { color: textCol }]}>AI Trending Explorer</Text>
+                <Text style={styles.aiSectionSub}>Prediksi kuliner viral dari internet</Text>
+              </View>
+            </View>
+            <View style={styles.aiGlowDot} />
+          </View>
+
+          <View style={styles.aiCategoryRow}>
+            {[
+              { id: 'food', label: 'Makanan', icon: 'food-variant' },
+              { id: 'drink', label: 'Minuman', icon: 'cup-water' },
+              { id: 'snack', label: 'Jajanan', icon: 'cookie' },
+            ].map((cat) => (
+              <TouchableOpacity
+                key={cat.id}
+                onPress={() => setSelectedAICategory(cat.id)}
+                style={[
+                  styles.aiCatTab,
+                  selectedAICategory === cat.id && { backgroundColor: isDarkMode ? '#4c1d95' : '#8b5cf6' }
+                ]}
+              >
+                <MaterialCommunityIcons 
+                  name={cat.icon} 
+                  size={16} 
+                  color={selectedAICategory === cat.id ? '#fff' : (isDarkMode ? '#888' : '#666')} 
+                />
+                <Text style={[
+                  styles.aiCatText,
+                  { color: selectedAICategory === cat.id ? '#fff' : (isDarkMode ? '#888' : '#666') }
+                ]}>
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </LinearGradient>
+
+        <View style={styles.aiContent}>
+          {aiLoading ? (
+            <View style={styles.aiLoader}>
+              <ActivityIndicator color="#8b5cf6" />
+            </View>
+          ) : (
+            <Animated.View style={{ opacity: aiOpacity, transform: [{ translateY: aiTranslateY }] }}>
+              {aiTrends.map((trend) => (
+                <TouchableOpacity 
+                  key={trend.id} 
+                  style={[styles.aiTrendCard, { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' }]}
+                  onPress={() => handleOpenBrowse(trend.sourceUrl)}
+                  activeOpacity={0.9}
+                >
+                  <Image source={{ uri: trend.image }} style={styles.aiTrendImg} />
+                  <View style={styles.aiTrendInfo}>
+                    <View style={styles.aiTrendTag}>
+                      <Text style={styles.aiTrendTagTxt}>🔥 HOT MATCH {trend.matchScore}%</Text>
+                    </View>
+                    <Text style={[styles.aiTrendTitle, { color: textCol }]}>{trend.title}</Text>
+                    <Text style={styles.aiTrendDesc} numberOfLines={2}>{trend.description}</Text>
+                    <View style={styles.aiTrendFooter}>
+                      <Text style={styles.aiBrowseBtn}>🌍 Browse Sumber Tren</Text>
+                      <MaterialCommunityIcons name="open-in-new" size={14} color="#8b5cf6" />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </Animated.View>
+          )}
+        </View>
+      </View>
+
       {/* ══ PROMO BANNER ══ */}
       <View style={styles.promoBanner}>
         <View style={styles.promoBg} />
@@ -803,6 +925,30 @@ const styles = StyleSheet.create({
   storeDist:        { fontSize: 10 },
   storeRatingBadge: { backgroundColor: 'rgba(255,99,71,0.8)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
   storeRating:      { fontSize: 10, color: '#fff', fontWeight: 'bold' },
+
+  // AI Section Styles
+  aiSection: { marginHorizontal: 16, marginBottom: 14, borderRadius: 20, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 },
+  aiHeaderGradient: { padding: 16 },
+  aiHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  aiTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  aiIconCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', elevation: 2 },
+  aiSectionTitle: { fontSize: 13, fontWeight: '900', letterSpacing: 0.5 },
+  aiSectionSub: { fontSize: 9, color: '#888', marginTop: 2 },
+  aiGlowDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#8b5cf6', shadowColor: '#8b5cf6', shadowRadius: 10, shadowOpacity: 1, elevation: 5 },
+  aiCategoryRow: { flexDirection: 'row', gap: 10 },
+  aiCatTab: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 15, gap: 6, backgroundColor: 'rgba(0,0,0,0.05)' },
+  aiCatText: { fontSize: 12, fontWeight: '700' },
+  aiContent: { padding: 16, paddingTop: 10 },
+  aiLoader: { padding: 40, alignItems: 'center' },
+  aiTrendCard: { flexDirection: 'row', borderRadius: 16, overflow: 'hidden', marginBottom: 12, elevation: 3, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5 },
+  aiTrendImg: { width: 100, height: 120 },
+  aiTrendInfo: { flex: 1, padding: 12 },
+  aiTrendTag: { alignSelf: 'flex-start', backgroundColor: '#8b5cf615', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, marginBottom: 6 },
+  aiTrendTagTxt: { fontSize: 9, fontWeight: '900', color: '#8b5cf6' },
+  aiTrendTitle: { fontSize: 15, fontWeight: '800', marginBottom: 4 },
+  aiTrendDesc: { fontSize: 11, color: '#666', lineHeight: 16 },
+  aiTrendFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
+  aiBrowseBtn: { fontSize: 11, fontWeight: '700', color: '#8b5cf6' },
 
   // Promo Banner
   promoBanner:      { marginHorizontal: 16, marginBottom: 14, borderRadius: 20, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 12, overflow: 'hidden', position: 'relative' },
