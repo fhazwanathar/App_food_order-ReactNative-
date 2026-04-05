@@ -23,11 +23,11 @@ function DockItem({ tab, isActive, onClick, mouseX, badge }) {
     return val - rect.x - 25;
   });
 
-  // Magnification — item membesar saat mouse dekat
+  // Magnification — item membesar saat mouse dekat (disesuaikan untuk layar sempit)
   const targetSize = useTransform(
     mouseDistance,
     [-150, 0, 150],
-    [36, 56, 36]
+    [32, 50, 32]
   );
   const size = useSpring(targetSize, { mass: 0.1, stiffness: 150, damping: 12 });
 
@@ -143,8 +143,8 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
   const mouseX  = useMotionValue(Infinity);
   const isHov   = useMotionValue(0);
 
-  // Height dock — mengembang saat hover
-  const heightRow = useTransform(isHov, [0, 1], [60, 80]);
+  // Height dock — mengembang saat hover (diturunkan agar tidak memangkas area layar di web HP)
+  const heightRow = useTransform(isHov, [0, 1], [50, 65]);
   const height    = useSpring(heightRow, { mass: 0.1, stiffness: 150, damping: 12 });
 
   return (
@@ -155,7 +155,7 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
         alignItems: 'flex-end',
         justifyContent: 'center',
         position: 'fixed',
-        bottom: 25,
+        bottom: 12,
         left: 0,
         right: 0,
         zIndex: 999,
@@ -169,10 +169,10 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 12,
+          gap: 10,
           backgroundColor: '#fff',
-          borderRadius: 30,
-          padding: '10px 16px',
+          borderRadius: 24,
+          padding: '6px 14px',
           boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
           pointerEvents: 'auto',
         }}
