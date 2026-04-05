@@ -27,7 +27,7 @@ function DockItem({ tab, isActive, onClick, mouseX, badge }) {
   const targetSize = useTransform(
     mouseDistance,
     [-150, 0, 150],
-    [32, 50, 32]
+    [24, 34, 24]
   );
   const size = useSpring(targetSize, { mass: 0.1, stiffness: 150, damping: 12 });
 
@@ -71,7 +71,7 @@ function DockItem({ tab, isActive, onClick, mouseX, badge }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: 14,
+          borderRadius: 10,
           cursor: 'pointer',
           position: 'relative',
           backgroundColor: isActive
@@ -92,7 +92,7 @@ function DockItem({ tab, isActive, onClick, mouseX, badge }) {
       >
         {/* Emoji icon */}
         <motion.span style={{
-          fontSize: 22,
+          fontSize: 15,
           filter: isActive ? 'none' : 'grayscale(20%)',
           transition: 'filter 0.2s',
         }}>
@@ -144,7 +144,7 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
   const isHov   = useMotionValue(0);
 
   // Height dock — mengembang saat hover (diturunkan agar tidak memangkas area layar di web HP)
-  const heightRow = useTransform(isHov, [0, 1], [50, 65]);
+  const heightRow = useTransform(isHov, [0, 1], [38, 48]);
   const height    = useSpring(heightRow, { mass: 0.1, stiffness: 150, damping: 12 });
 
   return (
@@ -155,7 +155,7 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
         alignItems: 'flex-end',
         justifyContent: 'center',
         position: 'fixed',
-        bottom: 12,
+        bottom: 5,
         left: 0,
         right: 0,
         zIndex: 999,
@@ -171,8 +171,8 @@ export default function AnimatedDock({ state, descriptors, navigation, badges = 
           alignItems: 'center',
           gap: 10,
           backgroundColor: '#fff',
-          borderRadius: 24,
-          padding: '6px 14px',
+          borderRadius: 18,
+          padding: '4px 10px',
           boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
           pointerEvents: 'auto',
         }}

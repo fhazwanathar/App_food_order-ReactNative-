@@ -90,7 +90,7 @@ function MenuStack() {
       headerStyle:      { backgroundColor: theme.colors.primary },
       headerTintColor:  '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
-      animationEnabled: true,
+      animationEnabled: Platform.OS !== 'web',
       presentation: 'card',
       ...creativeTransition,
     }}>
@@ -109,7 +109,7 @@ function CartStack() {
       headerStyle:      { backgroundColor: theme.colors.primary },
       headerTintColor:  '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
-      animationEnabled: true,
+      animationEnabled: Platform.OS !== 'web',
       presentation: 'card',
       ...creativeTransition,
     }}>
