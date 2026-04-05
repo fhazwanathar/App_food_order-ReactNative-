@@ -332,13 +332,17 @@ const MenuScreen = ({ navigation }) => {
   }, [selectedCategory, searchQuery, sortBy, showFavoritesOnly, favorites, menuItems, viralItems]);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, overflow: 'hidden' }]}>
       {/* Logo Header */}
       <View style={styles.menuHeader}>
         <MaterialCommunityIcons name="food" size={32} color={theme.primary} />
         <Text style={styles.menuHeaderTitle}>Aplikasi Pemesanan Makanan</Text>
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={{ flex: 1, minHeight: 0 }}
+        contentContainerStyle={{ paddingBottom: 110, flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
         <RestaurantOpeningHeader />
 
         {/* ── Sticky Header ── */}
