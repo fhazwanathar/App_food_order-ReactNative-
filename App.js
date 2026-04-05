@@ -90,7 +90,7 @@ function MenuStack() {
       headerStyle:      { backgroundColor: theme.colors.primary },
       headerTintColor:  '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
-      animationEnabled: true,
+      animationEnabled: Platform.OS !== 'web',
       presentation: 'card',
       ...creativeTransition,
     }}>
@@ -109,7 +109,7 @@ function CartStack() {
       headerStyle:      { backgroundColor: theme.colors.primary },
       headerTintColor:  '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
-      animationEnabled: true,
+      animationEnabled: Platform.OS !== 'web',
       presentation: 'card',
       ...creativeTransition,
     }}>
@@ -155,7 +155,6 @@ function MainTabs() {
         headerStyle:      { backgroundColor: theme.colors.primary },
         headerTintColor:  '#fff',
         headerTitleStyle: { fontWeight: 'bold' },
-        contentStyle:     { paddingBottom: 90 },
       }}
     >
       <Tab.Screen name="Home"     component={HomeScreen}        options={{ title: 'Beranda' }} />
@@ -215,7 +214,7 @@ function AppContent() {
 export default function App() {
   return (
     <AppProvider>
-      <View style={{ flex: 1, overflow: 'hidden' }}>
+      <View style={{ flex: 1 }}>
         <AppContent />
       </View>
     </AppProvider>
