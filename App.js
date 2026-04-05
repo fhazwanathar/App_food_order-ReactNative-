@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useEffect, useRef, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 
 import { darkTheme, lightTheme } from './src/config/theme';
 import { AppProvider, useApp } from './src/context/AppContext';
@@ -43,12 +43,15 @@ const creativeTransition = {
               outputRange: [layouts.screen.width * 0.5, 0],
             }),
           },
-          {
-            scale: current.progress.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0.9, 1],
-            }),
-          },
+          ...Platform.select({
+            web: [],
+            default: [{
+              scale: current.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.9, 1],
+              }),
+            }],
+          }),
         ],
         opacity: current.progress.interpolate({
           inputRange: [0, 1],
