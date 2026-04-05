@@ -8,9 +8,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import PinInputModal from '../components/PinInputModal';
 import { useApp } from '../context/AppContext';
 import { processEWalletPayment } from '../services/eWallet';
-import PinInputModal from '../components/PinInputModal';
 
 const PaymentScreen = ({ navigation, route }) => {
   const { total: originalTotal } = route.params;
@@ -190,7 +190,10 @@ const PaymentScreen = ({ navigation, route }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView
+        style={{ flex: 1, minHeight: 0 }}
+        contentContainerStyle={{ paddingBottom: 120, flexGrow: 1 }}
+      >
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📋 Informasi Pemesan</Text>
           <Text style={styles.label}>Nama Lengkap *</Text>
