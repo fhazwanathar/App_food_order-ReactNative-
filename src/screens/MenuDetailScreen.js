@@ -397,11 +397,23 @@ const MenuDetailScreen = ({ route }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
-      <Animated.ScrollView style={{ flex: 1 }} onScroll={Animated.event([
-          { nativeEvent: { contentOffset: { y: scrollY } } }],
+      {/* ── Floating Back Button ── */}
+      <TouchableOpacity 
+        style={styles.floatingBackBtn} 
+        onPress={() => navigation.goBack()}
+      >
+        <MaterialCommunityIcons name="arrow-left" size={24} color="#1a1a1a" />
+      </TouchableOpacity>
+
+      <Animated.ScrollView 
+        style={{ flex: 1, minHeight: 0 }}
+        contentContainerStyle={{ paddingBottom: 110 }} 
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: false }
         )}
-        scrollEventThrottle={16}>
+        scrollEventThrottle={16}
+      >
         {/* Gambar parallax */}
         <Animated.Image
           source={{ uri: item.image }}
@@ -559,6 +571,7 @@ const MenuDetailScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
   container:        { flex: 1 },
+  floatingBackBtn:  { position: 'absolute', top: 40, left: 16, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.9)', justifyContent: 'center', alignItems: 'center', zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 6, elevation: 4 },
   image:            { width: '100%', height: 280, resizeMode: 'cover' },
   section:          { padding: 16 },
   headerRow:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
