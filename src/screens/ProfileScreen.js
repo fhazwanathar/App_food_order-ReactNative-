@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { darkTheme, lightTheme } from '../config/theme';
 import { useApp } from '../context/AppContext';
+import GrainientBackground from '../components/GrainientBackground';
 
 const { width } = Dimensions.get('window');
 
@@ -183,11 +184,12 @@ const ProfileScreen = () => {
     <ScrollView style={[styles.container, { backgroundColor: bg }]} showsVerticalScrollIndicator={false}>
 
       {/* ══ HERO GRADIENT ══ */}
-      <LinearGradient
-        colors={isDarkMode ? ['#2D1A1A', '#121212'] : ['#FF6347', '#FF8C00']}
-        style={styles.hero}
-        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-      >
+      <View style={[styles.hero]}>
+        <GrainientBackground 
+          color1={isDarkMode ? "#533636" : "#FF6347"}
+          color2={isDarkMode ? "#f29f40" : "#FF8C00"}
+          color3={isDarkMode ? "#2D1A1A" : "#EE4D2D"}
+        />
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{initials}</Text>
@@ -214,7 +216,7 @@ const ProfileScreen = () => {
           <StatCard icon="wallet"   value={`${(totalSpent/1000).toFixed(0)}k`} label="Total Belanja" isDark={isDarkMode} delay={150} />
           <StatCard icon="heart"    value={favorites.length}                   label="Favorit"       isDark={isDarkMode} delay={300} />
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Space untuk stats overlap */}
       <View style={{ height: 50 }} />
