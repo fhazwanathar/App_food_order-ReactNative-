@@ -9,8 +9,6 @@ import {
 import { darkTheme, lightTheme } from '../config/theme';
 import { useApp } from '../context/AppContext';
 import GrainientBackground from '../components/GrainientBackground';
-import PillNav from '../components/PillNav';
-import ScrollHelper, { useScrollHelper } from '../components/ScrollHelper';
 
 const { width } = Dimensions.get('window');
 
@@ -76,7 +74,6 @@ const ProfileScreen = () => {
     toggleDarkMode, orderHistory, favorites,
     clearCart, signOut
   } = useApp();
-  const { scrollRef, isAtBottom, scrollProps } = useScrollHelper();
 
   const theme   = isDarkMode ? darkTheme : lightTheme;
   const bg      = isDarkMode ? '#121212' : '#f5f5f5';
@@ -184,12 +181,7 @@ const ProfileScreen = () => {
   const initials = (userProfile.name || 'U').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView 
-        {...scrollProps}
-        style={[styles.container, { backgroundColor: bg }]} 
-        showsVerticalScrollIndicator={true}
-      >
+    <ScrollView style={[styles.container, { backgroundColor: bg }]} showsVerticalScrollIndicator={false}>
 
       {/* ══ HERO GRADIENT ══ */}
       <View style={[styles.hero]}>
@@ -405,13 +397,9 @@ const ProfileScreen = () => {
         </View>
       </Animated.View>
 
-      <Text style={[styles.appVer, { color: subText }]}>FoodApp v1.0.0 (Premium OS)</Text>
-      <View style={{ height: 40 }} />
-      <PillNav />
+      <View style={{ height: 100 }} />
     </ScrollView>
-    <ScrollHelper scrollRef={scrollRef} isAtBottom={isAtBottom} />
-  </View>
-);
+  );
 };
 
 

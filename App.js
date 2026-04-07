@@ -3,7 +3,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useEffect, useRef, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
-import './src/styles/global.css';
 
 import { darkTheme, lightTheme } from './src/config/theme';
 import { AppProvider, useApp } from './src/context/AppContext';
@@ -26,7 +25,7 @@ import PromoHubScreen from './src/screens/PromoHubScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import SplashScreen from './src/screens/SplashScreen';
 
-// ── Modern Dock ──
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Tab   = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -144,12 +143,31 @@ function MainTabs() {
 
   return (
     <Tab.Navigator
-      tabBar={() => null}
-      screenOptions={{
+      activeColor="#FF6347"
+      inactiveColor={theme.colors.textSecondary}
+      screenOptions={({ route }) => ({
         headerStyle:      { backgroundColor: theme.colors.primary },
         headerTintColor:  '#fff',
         headerTitleStyle: { fontWeight: 'bold' },
-      }}
+        tabBarActiveTintColor: '#FF6347',
+        tabBarInactiveTintColor: theme.colors.textSecondary,
+        tabBarStyle: {
+          backgroundColor: theme.colors.card,
+          borderTopColor: theme.colors.border,
+          height: 60,
+          paddingBottom: 8,
+        },
+        tabBarIcon: ({ color, size }) => {
+          let iconName;
+          if (route.name === 'Home')    iconName = 'home-variant';
+          else if (route.name === 'Menu')    iconName = 'food-fork-drink';
+          else if (route.name === 'Cart')    iconName = 'shopping';
+          else if (route.name === 'History') iconName = 'history';
+          else if (route.name === 'Profile') iconName = 'account-circle';
+          else iconName = 'help-circle';
+          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+        },
+      })}
     >
       <Tab.Screen name="Home"     component={HomeScreen}        options={{ title: 'Beranda' }} />
       <Tab.Screen name="Menu"     component={MenuStack}         options={{ headerShown: false }} />
