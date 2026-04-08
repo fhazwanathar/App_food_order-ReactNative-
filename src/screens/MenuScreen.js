@@ -12,6 +12,7 @@ import Aurora from '../components/Aurora';
 import MapComponent from '../components/MapComponent';
 import ShinyText from '../components/ShinyText';
 import SuccessAnimation from '../components/SuccessAnimation';
+import GlareHover from '../components/GlareHover';
 import { darkTheme, lightTheme } from '../config/theme';
 import { useApp } from '../context/AppContext';
 import { fetchAITrends } from '../services/qdrantService';
@@ -63,7 +64,14 @@ const PinCard = ({ item, theme, onAddToCart, onToggleFavorite, onPress, isFavori
 
   return (
     <Animated.View style={[styles.pin, { backgroundColor: theme.card, transform: [{ scale: cardScale }] }]}>
-      <TouchableOpacity onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut} activeOpacity={1}>
+      <GlareHover
+        borderRadius={18}
+        glareOpacity={0.2}
+        transitionDuration={1000}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+      >
         {/* Image */}
         <View style={[styles.pinImgWrap, { height: imgHeight }]}>
           <Image source={{ uri: item.image }} style={styles.pinImg} />
@@ -110,7 +118,7 @@ const PinCard = ({ item, theme, onAddToCart, onToggleFavorite, onPress, isFavori
             </TouchableOpacity>
           </View>
         </View>
-      </TouchableOpacity>
+      </GlareHover>
     </Animated.View>
   );
 };
