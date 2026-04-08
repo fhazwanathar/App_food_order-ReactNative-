@@ -88,10 +88,10 @@ const GlareHover = ({
         
         {/* Animated Glare Streak */}
         <Animated.View
-          pointerEvents="none"
           style={[
             StyleSheet.absoluteFill,
             {
+              pointerEvents: 'none',
               transform: [
                 { translateX },
                 { rotate: rotation },

@@ -66,7 +66,7 @@ const DockItem = ({ tab, isActive, onPress, badge }) => {
 
 export default function AnimatedDock({ state, descriptors, navigation, badges = {} }) {
   return (
-    <View style={styles.container} pointerEvents="box-none">
+    <View style={[styles.container, { pointerEvents: 'box-none' }]}>
       <View style={styles.dock}>
         {state.routes.map((route, index) => {
           const tab      = TABS.find(t => t.name === route.name) || TABS[0];
