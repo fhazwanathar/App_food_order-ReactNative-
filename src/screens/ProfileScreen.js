@@ -9,6 +9,8 @@ import {
 import { darkTheme, lightTheme } from '../config/theme';
 import { useApp } from '../context/AppContext';
 import GrainientBackground from '../components/GrainientBackground';
+import MetallicPaint from '../components/MetallicPaint';
+import { METALLIC_LOGO_SVG } from '../constants/assets';
 
 const { width } = Dimensions.get('window');
 
@@ -397,7 +399,38 @@ const ProfileScreen = () => {
         </View>
       </Animated.View>
 
-      <View style={{ height: 100 }} />
+      {/* ══ FOOTER LOGO ══ */}
+      <View style={styles.footerLogoContainer}>
+        <MetallicPaint
+          imageSrc={METALLIC_LOGO_SVG}
+          seed={44.24}
+          scale={4}
+          patternSharpness={1.5}
+          noiseScale={0.5}
+          speed={0.8}
+          liquid={0.8}
+          mouseAnimation={false}
+          brightness={2.0}
+          contrast={0.6}
+          refraction={0.015}
+          blur={0.01}
+          chromaticSpread={2.5}
+          fresnel={1.2}
+          angle={24}
+          waveAmplitude={1.2}
+          distortion={1.2}
+          contour={0.3}
+          lightColor="#ff8b4d"
+          darkColor="#111111"
+          tintColor="#ff7b00"
+          style={{ height: 260 }}
+        />
+        <Text style={[styles.footerTagline, { color: isDarkMode ? '#444' : '#ccc' }]}>
+          © 2026 FoodsStrets • Premium Street Food
+        </Text>
+      </View>
+
+      <View style={{ height: 80 }} />
     </ScrollView>
   );
 };
@@ -448,7 +481,23 @@ const styles = StyleSheet.create({
   projectName: { fontSize: 14, fontWeight: '500' },
   dangerRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
   dangerTxt: { fontSize: 14, fontWeight: 'bold', color: '#ff4444' },
-  appVer: { textAlign: 'center', marginTop: 20, fontSize: 12 }
+  appVer: { textAlign: 'center', marginTop: 20, fontSize: 12 },
+
+  // Footer Logo
+  footerLogoContainer: {
+    paddingVertical: 10,
+    marginTop: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footerTagline: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2,
+    marginTop: -40,
+    opacity: 0.6,
+    textAlign: 'center'
+  },
 });
 
 export default ProfileScreen;

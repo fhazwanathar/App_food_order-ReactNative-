@@ -16,6 +16,8 @@ import GlareHover from '../components/GlareHover';
 import { darkTheme, lightTheme } from '../config/theme';
 import { useApp } from '../context/AppContext';
 import { fetchAITrends } from '../services/qdrantService';
+import MetallicPaint from '../components/MetallicPaint';
+import { METALLIC_LOGO_SVG } from '../constants/assets';
 
 const COL_GAP   = 10;
 const PADDING    = 14;
@@ -432,6 +434,37 @@ const MenuScreen = ({ navigation }) => {
           />
         )}
 
+        {/* ══ FOOTER LOGO ══ */}
+        <View style={styles.footerLogoContainer}>
+          <MetallicPaint
+            imageSrc={METALLIC_LOGO_SVG}
+            seed={44.24}
+            scale={4}
+            patternSharpness={1.5}
+            noiseScale={0.5}
+            speed={0.8}
+            liquid={0.8}
+            mouseAnimation={false}
+            brightness={2.0}
+            contrast={0.6}
+            refraction={0.015}
+            blur={0.01}
+            chromaticSpread={2.5}
+            fresnel={1.2}
+            angle={24}
+            waveAmplitude={1.2}
+            distortion={1.2}
+            contour={0.3}
+            lightColor="#ff8b4d"
+            darkColor="#111111"
+            tintColor="#ff7b00"
+            style={{ height: 260 }}
+          />
+          <Text style={[styles.footerTagline, { color: isDarkMode ? '#444' : '#ccc' }]}>
+            © 2026 FoodsStrets • Premium Street Food
+          </Text>
+        </View>
+
         <View style={{ height: 100 }} />
       </ScrollView>
       
@@ -561,6 +594,22 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#D4AF37',
     textTransform: 'uppercase',
+  },
+
+  // Footer Logo
+  footerLogoContainer: {
+    paddingVertical: 10,
+    marginTop: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footerTagline: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2,
+    marginTop: -40,
+    opacity: 0.6,
+    textAlign: 'center'
   },
 });
 
