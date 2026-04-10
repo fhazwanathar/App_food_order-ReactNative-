@@ -1,0 +1,41 @@
+<svg width="600" height="200" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+      <feOffset dx="2" dy="2" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <text 
+    x="50%" 
+    y="55%" 
+    dominant-baseline="middle" 
+    text-anchor="middle" 
+    font-family="Arial Black, sans-serif" 
+    font-size="80" 
+    fill="#000000"
+    letter-spacing="-2"
+    filter="url(#shadow)"
+  >
+    FOODSSTRETS
+  </text>
+  <text 
+    x="50%" 
+    y="85%" 
+    dominant-baseline="middle" 
+    text-anchor="middle" 
+    font-family="Arial, sans-serif" 
+    font-size="20" 
+    fill="#000000"
+    font-weight="bold"
+    letter-spacing="5"
+  >
+    STREET FOOD EXPERIENCE
+  </text>
+</svg>

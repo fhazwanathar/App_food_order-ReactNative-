@@ -9,6 +9,9 @@ import {
 import { darkTheme, lightTheme } from '../config/theme';
 import { useApp } from '../context/AppContext';
 import GrainientBackground from '../components/GrainientBackground';
+import MetallicPaint from '../components/MetallicPaint';
+import { METALLIC_LOGO_SVG } from '../constants/assets';
+import LogoLoop from '../components/LogoLoop';
 
 const { width } = Dimensions.get('window');
 
@@ -325,34 +328,28 @@ const ProfileScreen = () => {
         </Section>
       </Animated.View>
 
-      {/* ══ SECTION 2 — Kontak & Sosial ══ */}
+      {/* ══ SECTION 2 — Kontak & Sosial (Looping) ══ */}
       <Animated.View style={animStyle(anim2)}>
-        <Section icon="card-account-phone-outline" title="Contact Me" cardCol={card} textCol={textCol}>
-          {[
-            { label: 'GitHub',    url: 'https://github.com/siswayangtidakmencolok-afk',             icon: 'github',       color: '#000000' },
-            { label: 'GitLab',    url: 'https://gitlab.com/siswayangtidakmencolok',                 icon: 'gitlab',       color: '#FCA121' },
-            { label: 'PayPal',    url: 'https://paypal.me/FhazwanAthar?locale.x=id_ID&country.x=ID', icon: 'paypal',     color: '#003087' },
-            { label: 'WhatsApp',  url: 'https://wa.me/qr/RKCJNQUSIH6VF1',                          icon: 'whatsapp',     color: '#25D366' },
-            { label: 'Instagram', url: 'https://www.instagram.com/f.zvvn_/',                        icon: 'instagram',    color: '#E1306C' },
-            { label: 'Facebook',  url: 'https://www.facebook.com/share/1QzXJnQtXt/',               icon: 'facebook',     color: '#1877F2' },
-            { label: 'TikTok',    url: 'https://www.tiktok.com/@ekstrovertselalu',                  icon: 'music-note',   color: isDarkMode ? '#fff' : '#000' },
-            { label: 'Discord',   url: 'https://discord.com/channels/@zxyninety',                  icon: 'discord',      color: '#5865F2' },
-            { label: 'Telegram',  url: 'https://t.me/Art_zwn',                                     icon: 'telegram',     color: '#229ED9' },
-            { label: 'X',         url: 'https://x.com/www.x.com/zxyninety1',                       icon: 'twitter',      color: '#000000' },
-          ].map((social, index) => (
-            <View key={social.label}>
-              <TouchableOpacity style={styles.socialRow} onPress={() => Linking.openURL(social.url)}>
-                <View style={styles.socialLeft}>
-                  <View style={[styles.socialIconBox, { backgroundColor: social.color + '15' }]}>
-                    <MaterialCommunityIcons name={social.icon} size={20} color={social.color} />
-                  </View>
-                  <Text style={[styles.socialName, { color: textCol }]}>{social.label}</Text>
-                </View>
-                <MaterialCommunityIcons name="arrow-top-right" size={18} color={subText} />
-              </TouchableOpacity>
-              {index < 9 && <View style={[styles.divider, { backgroundColor: border }]} />}
-            </View>
-          ))}
+        <Section icon="food" title="Find Me Everywhere" cardCol={card} textCol={textCol}>
+          <View style={{ height: 80, justifyContent: 'center', marginVertical: 10 }}>
+            <LogoLoop
+              speed={140}
+              logoHeight={45}
+              gap={50}
+              fadeOut={true}
+              fadeOutColor={card}
+              scaleOnHover={true}
+              logos={[
+                { node: <MaterialCommunityIcons name="github" size={32} color={isDarkMode ? "#fff" : "#000"} />, title: "GitHub", href: 'https://github.com/siswayangtidakmencolok-afk' },
+                { node: <MaterialCommunityIcons name="whatsapp" size={32} color="#25D366" />, title: "WhatsApp", href: 'https://wa.me/qr/RKCJNQUSIH6VF1' },
+                { node: <MaterialCommunityIcons name="instagram" size={32} color="#E1306C" />, title: "Instagram", href: 'https://www.instagram.com/f.zvvn_/' },
+                { node: <MaterialCommunityIcons name="facebook" size={32} color="#1877F2" />, title: "Facebook", href: 'https://www.facebook.com/share/1QzXJnQtXt/' },
+                { node: <MaterialCommunityIcons name="twitter" size={32} color={isDarkMode ? "#fff" : "#000"} />, title: "X", href: 'https://x.com/www.x.com/zxyninety1' },
+                { node: <MaterialCommunityIcons name="telegram" size={32} color="#229ED9" />, title: "Telegram", href: 'https://t.me/Art_zwn' },
+                { node: <MaterialCommunityIcons name="discord" size={32} color="#5865F2" />, title: "Discord", href: 'https://discord.com/channels/@zxyninety' },
+              ]}
+            />
+          </View>
         </Section>
       </Animated.View>
  
@@ -397,7 +394,38 @@ const ProfileScreen = () => {
         </View>
       </Animated.View>
 
-      <View style={{ height: 100 }} />
+      {/* ══ FOOTER LOGO ══ */}
+      <View style={styles.footerLogoContainer}>
+        <MetallicPaint
+          imageSrc={METALLIC_LOGO_SVG}
+          seed={44.24}
+          scale={4}
+          patternSharpness={1.5}
+          noiseScale={0.5}
+          speed={0.8}
+          liquid={0.8}
+          mouseAnimation={false}
+          brightness={2.0}
+          contrast={0.6}
+          refraction={0.015}
+          blur={0.01}
+          chromaticSpread={2.5}
+          fresnel={1.2}
+          angle={24}
+          waveAmplitude={1.2}
+          distortion={1.2}
+          contour={0.3}
+          lightColor="#ff8b4d"
+          darkColor="#111111"
+          tintColor="#ff7b00"
+          style={{ height: 260 }}
+        />
+        <Text style={[styles.footerTagline, { color: isDarkMode ? '#444' : '#ccc' }]}>
+          © 2026 FoodsStrets • Premium Street Food
+        </Text>
+      </View>
+
+      <View style={{ height: 80 }} />
     </ScrollView>
   );
 };
@@ -448,7 +476,23 @@ const styles = StyleSheet.create({
   projectName: { fontSize: 14, fontWeight: '500' },
   dangerRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
   dangerTxt: { fontSize: 14, fontWeight: 'bold', color: '#ff4444' },
-  appVer: { textAlign: 'center', marginTop: 20, fontSize: 12 }
+  appVer: { textAlign: 'center', marginTop: 20, fontSize: 12 },
+
+  // Footer Logo
+  footerLogoContainer: {
+    paddingVertical: 10,
+    marginTop: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footerTagline: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2,
+    marginTop: -40,
+    opacity: 0.6,
+    textAlign: 'center'
+  },
 });
 
 export default ProfileScreen;
