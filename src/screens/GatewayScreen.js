@@ -7,7 +7,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import { useApp } from '../context/AppContext';
-import { createDokuTransaction } from '../services/dokuService';
+import { createMidtransTransaction } from '../services/midtransService';
 
 const { width, height } = Dimensions.get('window');
 
@@ -22,9 +22,10 @@ const GatewayScreen = ({ route, navigation }) => {
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Doku Colors
-  const dokuRed = '#ec2028'; 
-  const dokuDark = '#252525';
+  // Midtrans Colors
+  const midtransBlue = '#2D3192'; 
+  const midtransLightBlue = '#2DAAE1';
+  const midtransDark = '#1a1a1a';
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -37,33 +38,42 @@ const GatewayScreen = ({ route, navigation }) => {
   const handlePayNow = async () => {
     setLoading(true);
     try {
-      // 1. Panggil Service Doku untuk mendapatkan URL Checkout
-      const result = await createDokuTransaction({
-        orderNumber: orderData.id, // Gunakan order ID yang unik
+      // 1. Panggil Service Midtrans untuk mendapatkan URL Checkout
+      const result = await createMidtransTransaction({
+        orderNumber: orderData.orderNumber || orderData.id, 
         total: total,
         items: orderData.items,
         customerName: orderData.customerName || 'Customer',
         customerEmail: orderData.customerEmail || 'customer@example.com'
       });
 
-      if (result.success && result.checkout_url) {
-        setCheckoutUrl(result.checkout_url);
+      if (result.success && result.redirect_url) {
+        setCheckoutUrl(result.redirect_url);
         setStep(2); // Menuju WebView
       } else {
-        Alert.alert('Gagal Pembayaran', result.error || 'Server Doku tidak merespons');
+        const errorMsg = result.error || 'Server Midtrans tidak merespons';
+        Alert.alert(
+          'Gagal Pembayaran', 
+          `${errorMsg}\n\nTips: Silakan coba lagi atau pilih metode pembayaran lain.`
+        );
       }
     } catch (err) {
-      Alert.alert('Error', 'Sistem sedang sibuk. Hubungi admin.');
+      console.error(err);
+      Alert.alert('Error', 'Gagal terhubung ke sistem pembayaran Midtrans.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleWebViewStateChange = (navState) => {
-    // Deteksi jika URL mengandung 'payment-finish' (callback kita)
-    if (navState.url.includes('payment-finish') && !paymentFinished) {
+    // Midtrans redirect URLs (sesuaikan dengan konfigurasi di dashboard)
+    if ((navState.url.includes('finish') || navState.url.includes('completed')) && !paymentFinished) {
       setPaymentFinished(true);
       handlePaymentSuccess();
+    }
+    // Jika user menekan tombol batal di halaman Midtrans
+    if (navState.url.includes('unfinish') || navState.url.includes('cancel')) {
+      setStep(1);
     }
   };
 
@@ -103,10 +113,10 @@ const GatewayScreen = ({ route, navigation }) => {
         <MaterialCommunityIcons name="close" size={24} color="#333" />
       </TouchableOpacity>
       <View style={styles.dokuBranding}>
-        <Text style={styles.dokuText}>DOKU</Text>
-        <View style={styles.checkoutBadge}><Text style={styles.checkoutBadgeText}>CHECKOUT</Text></View>
+        <Text style={[styles.dokuText, { color: midtransBlue }]}>MIDTRANS</Text>
+        <View style={[styles.checkoutBadge, { backgroundColor: midtransLightBlue }]}><Text style={styles.checkoutBadgeText}>SNAP</Text></View>
       </View>
-      <MaterialCommunityIcons name="shield-check" size={22} color={dokuRed} />
+      <MaterialCommunityIcons name="shield-check" size={22} color={midtransLightBlue} />
     </View>
   );
 
@@ -137,7 +147,7 @@ const GatewayScreen = ({ route, navigation }) => {
           onNavigationStateChange={handleWebViewStateChange}
           startInLoadingState={true}
           renderLoading={() => (
-            <ActivityIndicator size="large" color={dokuRed} style={StyleSheet.absoluteFill} />
+            <ActivityIndicator size="large" color={midtransBlue} style={StyleSheet.absoluteFill} />
           )}
         />
       </SafeAreaView>
@@ -151,19 +161,19 @@ const GatewayScreen = ({ route, navigation }) => {
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.centerContent}>
         <Animated.View style={{ opacity: fadeAnim, alignItems: 'center', padding: 30 }}>
-           <MaterialCommunityIcons name="credit-card-outline" size={80} color={dokuRed} />
+           <MaterialCommunityIcons name="credit-card-outline" size={80} color={midtransBlue} />
            <Text style={styles.mainTitle}>Siap Lanjut ke Pembayaran?</Text>
            <Text style={styles.subTitle}>
-             Anda akan diarahkan ke halaman resmi DOKU untuk memilih metode pembayaran 
-             (Transfer Bank, OVO, ShopeePay, atau QRIS).
+             Anda akan diarahkan ke halaman resmi Midtrans untuk memilih metode pembayaran 
+             (Transfer Bank, E-Wallet, atau QRIS).
            </Text>
 
-           <TouchableOpacity style={styles.payNowBtn} onPress={handlePayNow} disabled={loading}>
+           <TouchableOpacity style={[styles.payNowBtn, { backgroundColor: midtransBlue }]} onPress={handlePayNow} disabled={loading}>
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={styles.payNowText}>Bayar Sekarang (DOKU)</Text>
+                  <Text style={styles.payNowText}>Bayar Sekarang (Midtrans)</Text>
                   <MaterialCommunityIcons name="chevron-right" size={24} color="#fff" />
                 </View>
               )}
@@ -171,15 +181,16 @@ const GatewayScreen = ({ route, navigation }) => {
 
            <View style={styles.paymentIcons}>
               <MaterialCommunityIcons name="bank" size={24} color="#aaa" />
-              <MaterialCommunityIcons name="qrcode-scan" size={24} color="#aaa" />
+              <MaterialCommunityIcons name="credit-card" size={24} color="#aaa" />
               <MaterialCommunityIcons name="wallet" size={24} color="#aaa" />
+              <MaterialCommunityIcons name="qrcode-scan" size={24} color="#aaa" />
            </View>
         </Animated.View>
       </ScrollView>
 
       <View style={styles.bottomSecurity}>
         <MaterialCommunityIcons name="lock-outline" size={14} color="#999" />
-        <Text style={styles.securityText}>Keamanan Terjamin oleh DOKU PCI-DSS</Text>
+        <Text style={styles.securityText}>Keamanan Terjamin oleh Midtrans PCI-DSS</Text>
       </View>
     </SafeAreaView>
   );
@@ -192,7 +203,7 @@ const styles = StyleSheet.create({
     padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee'
   },
   dokuBranding: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  dokuText: { color: '#ec2028', fontWeight: '900', fontSize: 20 },
+  dokuText: { fontWeight: '900', fontSize: 20 },
   checkoutBadge: { backgroundColor: '#252525', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
   checkoutBadgeText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
   orderSummary: { 

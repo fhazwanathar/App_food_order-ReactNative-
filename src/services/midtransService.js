@@ -1,37 +1,76 @@
 // src/services/midtransService.js
-/**
- * Layanan Simulasi Midtrans - Membantu menangani logika pembayaran
- * yang meniru alur SNAP Sandbox.
- */
-
-// Placeholder untuk Client Key Anda nanti
-export const MIDTRANS_CLIENT_KEY = 'SB-Mid-client-XXXXXXXXXXXX'; 
+import { MIDTRANS_CONFIG } from '../config/midtrans';
+import CryptoJS from 'crypto-js';
+import { Platform } from 'react-native';
 
 /**
- * Mensimulasikan permintaan pembuatan Snap Token.
- * Nantinya fungsi ini akan memanggil backend Anda (misal: Laravel/NodeJS)
- * yang kemudian diteruskan ke API Midtrans.
+ * Membuat Transaksi Baru di Midtrans Snap
+ * @param {Object} orderData data dari keranjang/checkout
  */
-export const createSnapTransaction = async (orderData) => {
-  console.log('Simulating Midtrans Transaction for Order:', orderData.orderNumber);
-  
-  // Simulasi delay network
-  await new Promise(resolve => setTimeout(resolve, 800));
+export const createMidtransTransaction = async (orderData) => {
+  try {
+    const serverKey = MIDTRANS_CONFIG.SERVER_KEY;
+    const authHeader = `Basic ${CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(serverKey + ':'))}`;
 
-  // Mengembalikan Toko "Dummy" yang merepresentasikan Snap Token
-  return {
-    snapToken: `token-${Math.random().toString(36).substr(2, 9)}`,
-    redirectUrl: '#', // Di real App, ini arahkan ke WebView
-  };
-};
+    // Gunakan CORS Proxy jika dijalankan di Web (localhost) agar tidak diblokir browser
+    const url = Platform.OS === 'web' 
+      ? `https://api.allorigins.win/raw?url=${encodeURIComponent(MIDTRANS_CONFIG.BASE_URL)}`
+      : MIDTRANS_CONFIG.BASE_URL;
 
-/**
- * Ikon Bank untuk UI Midtrans
- */
-export const BANK_ICONS = {
-  bca: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia.svg/1200px-Bank_Central_Asia.svg.png',
-  mandiri: 'https://upload.wikimedia.org/wikipedia/id/thumb/a/ad/Bank_Mandiri_logo_2016.svg/1200px-Bank_Mandiri_logo_2016.svg.png',
-  bni: 'https://upload.wikimedia.org/wikipedia/id/thumb/5/51/Bank_Negara_Indonesia_logo.svg/1200px-Bank_Negara_Indonesia_logo.svg.png',
-  bri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/BANK_BRI_logo.svg/1200px-BANK_BRI_logo.svg.png',
-  qris: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_QRIS.svg/1200px-Logo_QRIS.svg.png',
+    // 1. Siapkan Body Request sesuai spek Midtrans Snap
+    const body = {
+      transaction_details: {
+        order_id: `FOODS-${orderData.orderNumber || Date.now()}`,
+        gross_amount: Math.floor(Number(orderData.total))
+      },
+      item_details: orderData.items.map(item => ({
+        id: item.id || Math.random().toString(36).substr(2, 9),
+        price: Math.floor(Number(item.price)),
+        quantity: item.quantity,
+        name: item.name.substring(0, 50)
+      })),
+      customer_details: {
+        first_name: orderData.customerName || 'Pelanggan',
+        email: orderData.customerEmail || 'customer@example.com'
+      },
+      credit_card: {
+        secure: true
+      },
+      // Opsional: Batasi metode pembayaran
+      // enabled_payments: ["credit_card", "gopay", "shopeepay", "other_qris", "bank_transfer"]
+    };
+
+    // 2. Kirim Request ke Midtrans API
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': authHeader
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.token && data.redirect_url) {
+      console.log('[Midtrans] Transaction Created:', data.token);
+      return {
+        success: true,
+        token: data.token,
+        redirect_url: data.redirect_url, // URL untuk WebView
+        order_id: body.transaction_details.order_id
+      };
+    } else {
+      console.error('[Midtrans] API Error:', data);
+      return { 
+        success: false, 
+        error: data.error_messages ? data.error_messages[0] : 'Gagal membuat transaksi Midtrans' 
+      };
+    }
+
+  } catch (error) {
+    console.error('[Midtrans] Service Error:', error);
+    return { success: false, error: error.message };
+  }
 };
