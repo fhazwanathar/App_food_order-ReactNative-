@@ -5,10 +5,10 @@ frontend:
       commands:
         - nvm use 20
         - node -v
-        - npm install
+        - npm install --frozen-lockfile || npm install
     build:
       commands:
-        - npm run build:web
+        - npx expo export
   artifacts:
     baseDirectory: dist
     files:
