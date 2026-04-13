@@ -56,9 +56,18 @@ const AIChatBubble = () => {
     setMessage('');
     setLoading(true);
 
-    const aiResponse = await sendMessageToGemini(message);
+    const aiResponse = await sendMessageToGemini(message, chat);
     setChat(prev => [...prev, { role: 'ai', text: aiResponse }]);
     setLoading(false);
+  };
+
+  const handleKeyPress = (e) => {
+    // Kirim pesan saat Enter ditekan (khusus Web/Laptop)
+    // Shift+Enter tetap baris baru
+    if (Platform.OS === 'web' && e.nativeEvent.key === 'Enter' && !e.nativeEvent.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   useEffect(() => {
@@ -90,7 +99,7 @@ const AIChatBubble = () => {
             style={styles.bubble}
           >
             <View style={styles.metallicOverlay} />
-            <MaterialCommunityIcons name="chef-hat" size={32} color="#000" />
+            <MaterialCommunityIcons name="chef-hat" size={24} color="#000" />
             <View style={styles.badge} />
           </TouchableOpacity>
         </Animated.View>
@@ -150,6 +159,8 @@ const AIChatBubble = () => {
                 value={message}
                 onChangeText={setMessage}
                 multiline
+                onKeyPress={handleKeyPress}
+                blurOnSubmit={false}
               />
               <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
                 <MaterialCommunityIcons name="send" size={24} color="#FFD700" />
@@ -173,55 +184,54 @@ const styles = StyleSheet.create({
   },
   bubbleWrapper: {
     position: 'absolute',
-    bottom: 80,
-    right: 20,
+    bottom: 80, // Slightly lower for more compactness
+    right: 15,
   },
   bubble: {
-    width: 65,
-    height: 65,
-    borderRadius: 32.5,
-    backgroundColor: '#FF8C00', // Deep Orange
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FF6B00',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 10,
+    elevation: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    borderWidth: 2,
-    borderColor: '#FFD700', // Gold/Yellow
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    borderWidth: 1.2,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
     overflow: 'hidden',
   },
   metallicOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    // Efek kilau bisa ditambah dengan gradient jika tersedia
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   badge: {
     position: 'absolute',
-    top: 15,
-    right: 15,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#4CAF50', // Status Online
-    borderWidth: 2,
-    borderColor: '#FF8C00',
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4CAF50',
+    borderWidth: 1.2,
+    borderColor: '#FF6B00',
   },
   chatWindow: {
     position: 'absolute',
     bottom: 20,
     right: 20,
-    width: width * 0.9,
-    maxWidth: 380,
-    height: height * 0.6,
-    backgroundColor: 'rgba(26, 26, 26, 0.95)', // Black Glass
-    borderRadius: 20,
+    width: Platform.OS === 'web' ? 380 : width * 0.9,
+    maxWidth: 400,
+    height: height * 0.55,
+    backgroundColor: 'rgba(30, 30, 30, 0.98)', // Minimalist Dark
+    borderRadius: 24,
     overflow: 'hidden',
     elevation: 20,
     shadowColor: '#000',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.3)',
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   header: {
     flexDirection: 'row',

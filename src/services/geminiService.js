@@ -1,7 +1,7 @@
 // src/services/geminiService.js
 
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 /**
  * Instruksi Sistem untuk melatih karakter "Street Chef"
@@ -23,20 +23,27 @@ export const sendMessageToGemini = async (userMessage, chatHistory = []) => {
       throw new Error('API Key Gemini tidak ditemukan. Harap cek file .env Anda.');
     }
 
-    // Format riwayat pesan untuk Gemini (opsional, untuk percakapan bersambung)
-    const contents = [
-      {
-        role: 'user',
-        parts: [{ text: SYSTEM_INSTRUCTION + "\n\nUser: " + userMessage }]
-      }
-    ];
+    // Ambil 5-10 pesan terakhir saja agar tidak overload
+    const recentHistory = chatHistory.slice(-10);
+
+    const history = recentHistory.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.text }]
+    }));
 
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ contents }),
+      body: JSON.stringify({
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: `INSTRUKSI SISTEM: ${SYSTEM_INSTRUCTION}\n\nKONTEKS CHAT SEBELUMNYA: ${JSON.stringify(recentHistory)}\n\nUSER: ${userMessage}` }]
+          }
+        ],
+      }),
     });
 
     const data = await response.json();
@@ -44,11 +51,13 @@ export const sendMessageToGemini = async (userMessage, chatHistory = []) => {
     if (data.candidates && data.candidates.length > 0) {
       return data.candidates[0].content.parts[0].text;
     } else {
+      // Tampilkan error teknis ke UI agar kita bisa diagnosa
+      const errMsg = data.error?.message || JSON.stringify(data);
       console.error('[Gemini Error]', data);
-      return "Maaf, Street Chef sedang sibuk di dapur. Bisa ulangi pertanyaannya? 👨‍🍳";
+      return `Maaf, ada kendala teknis: ${errMsg.substring(0, 50)}... 👨‍🍳`;
     }
   } catch (error) {
     console.error('[Gemini Service Error]', error);
-    return "Ups! Koneksi ke dapur Street Chef terputus. Pastikan internetmu aktif ya! 🛵";
+    return `Koneksi terputus: ${error.message}. Coba lagi ya! 🛵`;
   }
 };
