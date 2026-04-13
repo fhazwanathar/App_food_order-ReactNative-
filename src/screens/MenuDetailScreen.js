@@ -425,6 +425,12 @@ const MenuDetailScreen = ({ route }) => {
         {/* Info makanan */}
         <View style={[styles.section, { backgroundColor: card }]}>
           <View style={styles.headerRow}>
+            <TouchableOpacity 
+              onPress={() => navigation.goBack()}
+              style={styles.backBtnInline}
+            >
+              <MaterialCommunityIcons name="arrow-left" size={26} color={textCol} />
+            </TouchableOpacity>
             <View style={{ flex: 1 }}>
               <Text style={[styles.name, { color: textCol }]}>{item.name}</Text>
               <View style={styles.categoryBadge}>
@@ -557,25 +563,16 @@ const MenuDetailScreen = ({ route }) => {
           )}
         </View>
       </ScrollView>
-
-      {/* Floating Back Button */}
-      <TouchableOpacity 
-        style={styles.floatingBackBtn} 
-        onPress={() => navigation.goBack()}
-        activeOpacity={0.8}
-      >
-        <MaterialCommunityIcons name="arrow-left" size={24} color="#333" />
-      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container:        { flex: 1 },
-  floatingBackBtn:  { position: 'absolute', top: 40, left: 16, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.9)', justifyContent: 'center', alignItems: 'center', zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 6, elevation: 4 },
+  headerRow:        { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 12 },
+  backBtnInline:    { width: 40, height: 40, justifyContent: 'center', alignItems: 'center', marginLeft: -8 },
   image:            { width: '100%', height: 280, resizeMode: 'cover' },
   section:          { padding: 16 },
-  headerRow:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   name:             { fontSize: 22, fontWeight: 'bold', marginBottom: 8 },
   categoryBadge:    { backgroundColor: '#e3f2fd', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, alignSelf: 'flex-start' },
   categoryText:     { fontSize: 12, color: '#1976d2', fontWeight: '600' },

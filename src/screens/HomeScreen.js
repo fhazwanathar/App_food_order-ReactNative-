@@ -408,7 +408,7 @@ const nearbyStores = [
 const HomeScreen = ({ navigation }) => {
   const { 
     isDarkMode, userProfile, cart, menuItems, 
-    userLocation, updateUserLocation 
+    userLocation, updateUserLocation, addToCart 
   } = useApp();
   const theme   = isDarkMode ? darkTheme : lightTheme;
   const bg      = isDarkMode ? '#0a0a0a' : '#f5f5f5';

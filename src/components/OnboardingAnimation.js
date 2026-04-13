@@ -9,48 +9,79 @@ const iconMap = {
 };
 
 export default function OnboardingAnimation({ name, style }) {
-  const floatAnim = useRef(new Animated.Value(0)).current;
+  const floatAnim  = useRef(new Animated.Value(0)).current;
+  const bounceAnim = useRef(new Animated.Value(1)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Continuous floating animation
     Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatAnim, {
-          toValue: -15,
-          duration: 2000,
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(floatAnim, { toValue: -20, duration: 1500, useNativeDriver: true }),
+          Animated.timing(floatAnim, { toValue: 0, duration: 1500, useNativeDriver: true }),
+        ]),
+        Animated.sequence([
+          Animated.timing(bounceAnim, { toValue: 1.08, duration: 1500, useNativeDriver: true }),
+          Animated.timing(bounceAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
+        ]),
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: 6000,
           useNativeDriver: true,
-        }),
-        Animated.timing(floatAnim, {
-          toValue: 0,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
+        })
       ])
     ).start();
   }, []);
 
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg']
+  });
+
+  const iconName = iconMap[name] || 'silverware';
+
   return (
     <View style={[style, styles.container]}>
+      {/* ── Glow Stack (Icon Layering) ── */}
       <Animated.View style={[
         styles.iconWrapper,
-        { transform: [{ translateY: floatAnim }] }
+        { 
+          transform: [
+            { translateY: floatAnim }, 
+            { scale: bounceAnim },
+            { rotate: spin }
+          ] 
+        }
       ]}>
+        {/* Glow Layer 1 (Outer Aura) */}
+        <Animated.View style={[styles.glowLayer, { opacity: 0.12, transform: [{ scale: 1.5 }] }]}>
+          <MaterialCommunityIcons name={iconName} size={95} color="#FFB347" />
+        </Animated.View>
+        
+        {/* Glow Layer 2 (Inner Shine) */}
+        <Animated.View style={[styles.glowLayer, { opacity: 0.25, transform: [{ scale: 1.25 }] }]}>
+          <MaterialCommunityIcons name={iconName} size={88} color="#FF8C00" />
+        </Animated.View>
+
+        {/* Main Icon (Top Layer) */}
         <MaterialCommunityIcons 
-          name={iconMap[name] || 'silverware'} 
-          size={80} 
+          name={iconName} 
+          size={82} 
           color="#FF6347" 
+          style={styles.mainIcon}
         />
       </Animated.View>
+
       <Animated.View style={[
         styles.shadow,
         {
           opacity: floatAnim.interpolate({
-            inputRange: [-15, 0],
-            outputRange: [0.02, 0.05],
+            inputRange: [-20, 0],
+            outputRange: [0.03, 0.1],
           }),
           transform: [{ scale: floatAnim.interpolate({
-            inputRange: [-15, 0],
-            outputRange: [0.8, 1],
+            inputRange: [-20, 0],
+            outputRange: [0.6, 1.2],
           }) }]
         }
       ]} />
@@ -64,25 +95,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconWrapper: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 10,
+    elevation: 15,
     shadowColor: '#FF6347',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 15,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
     zIndex: 2,
+  },
+  glowLayer: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mainIcon: {
+    zIndex: 5,
+    textShadowColor: 'rgba(255, 99, 71, 0.5)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 10,
   },
   shadow: {
     position: 'absolute',
-    bottom: -20,
-    width: 100,
-    height: 15,
+    bottom: -25,
+    width: 110,
+    height: 18,
     borderRadius: 10,
     backgroundColor: '#000',
   }
-});
+});

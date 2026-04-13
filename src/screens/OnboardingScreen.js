@@ -46,20 +46,24 @@ const OnboardingScreen = ({ onFinish }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const smokeAnim = useRef(new Animated.Value(1)).current;
 
   const goToNext = () => {
-    // Stage 1: Transition Out
+    // Stage 1: Transition Out (Slide Up + Fade out + Smoke)
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 0, duration: 250, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: -50, duration: 250, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: -100, duration: 400, useNativeDriver: true }),
+      Animated.timing(smokeAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
     ]).start(() => {
       if (currentIndex < slides.length - 1) {
         setCurrentIndex(currentIndex + 1);
-        slideAnim.setValue(50);
-        // Stage 2: Transition In
+        slideAnim.setValue(100); // Start from bottom
+        
+        // Stage 2: Transition In (Sailing Up)
         Animated.parallel([
-          Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
-          Animated.timing(slideAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+          Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+          Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
+          Animated.timing(smokeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
         ]).start();
       } else {
         onFinish();
@@ -86,13 +90,26 @@ const OnboardingScreen = ({ onFinish }) => {
           style={styles.animation}
         />
         <View style={styles.textContainer}>
-          <Text style={styles.subtitle}>{currentSlide.subtitle}</Text>
-          <Text style={[styles.title, { color: theme.text }]}>
+          <Animated.Text style={[styles.subtitle, { 
+            opacity: smokeAnim, 
+            transform: [{ translateY: smokeAnim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }]
+          }]}>
+            {currentSlide.subtitle}
+          </Animated.Text>
+          <Animated.Text style={[styles.title, { 
+            color: theme.text,
+            opacity: smokeAnim,
+            transform: [{ translateY: smokeAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }]
+          }]}>
             {currentSlide.title}
-          </Text>
-          <Text style={[styles.description, { color: theme.textSecondary }]}>
+          </Animated.Text>
+          <Animated.Text style={[styles.description, { 
+            color: theme.textSecondary,
+            opacity: smokeAnim,
+            transform: [{ translateY: smokeAnim.interpolate({ inputRange: [0, 1], outputRange: [30, 0] }) }]
+          }]}>
             {currentSlide.description}
-          </Text>
+          </Animated.Text>
         </View>
       </Animated.View>
 
@@ -142,13 +159,14 @@ const styles = StyleSheet.create({
   },
   slideContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 30,
+    paddingTop: height * 0.12, // Menarik konten lebih ke atas
   },
   animation: {
-    width: width * 0.7,
-    height: width * 0.7,
+    width: width * 0.75,
+    height: width * 0.75,
     marginBottom: 40,
   },
   textContainer: {
@@ -158,22 +176,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '900',
     color: '#FF6347',
-    letterSpacing: 3,
+    letterSpacing: 4,
     marginBottom: 10,
+    textTransform: 'uppercase',
   },
   title: {
     fontWeight: '900',
-    fontSize: 32,
+    fontSize: 28,
     marginBottom: 16,
     textAlign: 'center',
     letterSpacing: -0.5,
   },
   description: {
-    fontWeight: '300',
+    fontWeight: '400',
     textAlign: 'center',
-    lineHeight: 24,
-    fontSize: 16,
-    paddingHorizontal: 20,
+    lineHeight: 22,
+    fontSize: 15,
+    paddingHorizontal: 10,
   },
   footer: {
     width: '100%',
@@ -191,23 +210,23 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   buttonWrapper: {
-    width: width * 0.85,
-    maxWidth: 400,
-    borderRadius: 16,
+    width: width * 0.65,
+    maxWidth: 320,
+    borderRadius: 14,
     overflow: 'hidden',
     elevation: 8,
     shadowColor: '#FF6347',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
     shadowRadius: 10,
   },
   button: {
-    padding: 18,
+    padding: 16,
     alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16, // UI Standard
+    fontSize: 15,
     fontWeight: '900',
     textTransform: 'uppercase',
     letterSpacing: 2,

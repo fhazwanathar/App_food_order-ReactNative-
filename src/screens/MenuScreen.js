@@ -349,6 +349,12 @@ const MenuScreen = ({ navigation }) => {
     <View style={[styles.container, { backgroundColor: theme.background, overflow: 'hidden' }]}>
       {/* Logo Header */}
       <View style={styles.menuHeader}>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('Home')} 
+          style={{ position: 'absolute', left: 18, zIndex: 10, padding: 4 }}
+        >
+          <MaterialCommunityIcons name="arrow-left" size={30} color="#fff" />
+        </TouchableOpacity>
         <MaterialCommunityIcons name="food" size={32} color={theme.primary} />
         <Text style={styles.menuHeaderTitle}>Aplikasi Pemesanan Makanan</Text>
       </View>
