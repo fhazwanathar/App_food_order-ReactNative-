@@ -1,4 +1,5 @@
 // src/screens/OnboardingScreen.js
+// PPT-style staggered text entrance + smooth slide transitions
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -18,165 +19,145 @@ const { width, height } = Dimensions.get('window');
 const slides = [
   {
     id: '1',
-    title: 'Pesan Makanan\nFavoritmu',
     tag: 'KUALITAS BINTANG LIMA',
-    desc: 'Temukan menu lezat dari restoran terbaik di sekitarmu.',
+    title: 'Pesan Makanan\nFavoritmu',
+    desc: 'Temukan menu lezat dari restoran terbaik di sekitarmu — cepat, mudah, dan memuaskan.',
     animationKey: 'food-loading',
+    accent: '#FF6347',
   },
   {
     id: '2',
-    title: 'Pengiriman\nSuper Cepat',
     tag: 'SAMPAI DALAM 30 MENIT',
-    desc: 'Kurir kami siap antarkan pesananmu dengan pelacakan real-time.',
+    title: 'Pengiriman\nSuper Cepat',
+    desc: 'Kurir kami siap antarkan pesananmu dengan teknologi pelacakan real-time langsung ke tanganmu.',
     animationKey: 'delivery',
+    accent: '#FF8C00',
   },
   {
     id: '3',
-    title: 'Promo\nExclusive',
     tag: 'HEMAT SETIAP HARI',
-    desc: 'Diskon dan promo menarik setiap hari khusus Sobat FoodsStreets.',
+    title: 'Promo\nExclusive',
+    desc: 'Raih diskon dan penawaran spesial setiap hari — khusus untuk Sobat FoodsStreets.',
     animationKey: 'success',
+    accent: '#FFB347',
   },
 ];
 
-// ─────────────────────────────────────────
-//  Phase 1: Cinematic Intro (Wave + Brand)
-// ─────────────────────────────────────────
+// ─────────────────────────────────────────────────
+//  Cinematic Intro: Wave + Brand Name (Monarch style)
+// ─────────────────────────────────────────────────
 function CinematicIntro({ onDone }) {
-  const waveAnim  = useRef(new Animated.Value(0)).current; // 0→1 wave cover
+  const waveAnim  = useRef(new Animated.Value(0)).current;
   const titleAnim = useRef(new Animated.Value(0)).current;
   const tagAnim   = useRef(new Animated.Value(0)).current;
   const exitAnim  = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.sequence([
-      // 1. Wave rises to cover screen
-      Animated.timing(waveAnim, {
-        toValue: 1,
-        duration: 1100,
-        useNativeDriver: true,
-      }),
-      // 2. Brand text appears
+      Animated.timing(waveAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
       Animated.parallel([
-        Animated.timing(titleAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(tagAnim, {
-          toValue: 1,
-          duration: 800,
-          delay: 200,
-          useNativeDriver: true,
-        }),
+        Animated.timing(titleAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.timing(tagAnim,   { toValue: 1, duration: 800, delay: 250, useNativeDriver: true }),
       ]),
-      // 3. Hold
-      Animated.delay(1300),
-      // 4. Fade out
-      Animated.timing(exitAnim, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }),
+      Animated.delay(1400),
+      Animated.timing(exitAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
     ]).start(() => onDone());
   }, []);
 
-  // Wave translates from bottom (height) → 0
-  const waveTranslateY = waveAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [height, 0],
-  });
-
-  // Title slides up + fades in
-  const titleTranslateY = titleAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [40, 0],
-  });
-  const tagTranslateY = tagAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [20, 0],
-  });
+  const waveY = waveAnim.interpolate({ inputRange: [0, 1], outputRange: [height, 0] });
+  const titleY = titleAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] });
+  const tagY   = tagAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] });
 
   return (
-    <Animated.View style={[styles.introWrap, { opacity: exitAnim }]}>
-      {/* Dark background */}
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a0a0a' }]} />
-
-      {/* Rising Wave */}
-      <Animated.View
-        style={[StyleSheet.absoluteFill, { transform: [{ translateY: waveTranslateY }] }]}
-      >
+    <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a0a0a', opacity: exitAnim, overflow: 'hidden' }]}>
+      {/* Rising wave */}
+      <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateY: waveY }] }]}>
         <LinearGradient
-          colors={['#FF4500', '#FF6347', '#FFB347']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          colors={['#B22200', '#FF4500', '#FF6347', '#FF8C00']}
+          start={{ x: 0.1, y: 0 }} end={{ x: 0.9, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>
 
-      {/* Brand Center */}
+      {/* Brand center */}
       <View style={styles.introCenter}>
-        {/* Stacked Text Effect (like Monarch Bank reference) */}
-        <Animated.View
-          style={{
-            opacity: titleAnim,
-            transform: [{ translateY: titleTranslateY }],
-            alignItems: 'center',
-          }}
-        >
-          {/* Shadow layer 1 */}
-          <Text style={[styles.introTitle, styles.introTitleLayer1]}>
-            <Text style={styles.introBrand}>F</Text>oodsStreets
+        {/* Stacked text (depth effect) */}
+        <Animated.View style={{ opacity: titleAnim, transform: [{ translateY: titleY }], alignItems: 'center' }}>
+          <Text style={[styles.introTitle, { opacity: 0.12, position: 'absolute', top: 4 }]}>
+            <Text style={styles.introF}>F</Text>oodsStreets
           </Text>
-          {/* Shadow layer 2 */}
-          <Text style={[styles.introTitle, styles.introTitleLayer2, styles.introTitleAbs]}>
-            <Text style={styles.introBrand}>F</Text>oodsStreets
+          <Text style={[styles.introTitle, { opacity: 0.35, position: 'absolute', top: 2 }]}>
+            <Text style={styles.introF}>F</Text>oodsStreets
           </Text>
-          {/* Main text */}
-          <Text style={[styles.introTitle, styles.introTitleMain, styles.introTitleAbs]}>
-            <Text style={styles.introBrand}>F</Text>oodsStreets
+          <Text style={styles.introTitle}>
+            <Text style={styles.introF}>F</Text>oodsStreets
           </Text>
         </Animated.View>
 
-        <Animated.Text
-          style={[
-            styles.introTagline,
-            { opacity: tagAnim, transform: [{ translateY: tagTranslateY }] },
-          ]}
-        >
-          Pesan. Nikmati. Ulangi.
+        <Animated.Text style={[styles.introTagline, { opacity: tagAnim, transform: [{ translateY: tagY }] }]}>
+          Pesan  ·  Nikmati  ·  Ulangi
         </Animated.Text>
       </View>
     </Animated.View>
   );
 }
 
-// ─────────────────────────────────────────
-//  Phase 2: Content Slides
-// ─────────────────────────────────────────
+// ─────────────────────────────────────────────────
+//  PPT-style staggered element entrance
+// ─────────────────────────────────────────────────
+function useStaggeredEntrance(trigger) {
+  const anims = [
+    useRef(new Animated.Value(0)).current, // tag
+    useRef(new Animated.Value(0)).current, // icon
+    useRef(new Animated.Value(0)).current, // title
+    useRef(new Animated.Value(0)).current, // desc
+  ];
+
+  useEffect(() => {
+    // Reset all
+    anims.forEach(a => a.setValue(0));
+
+    const stagger = Animated.stagger(
+      120,
+      anims.map(a =>
+        Animated.parallel([
+          Animated.timing(a, { toValue: 1, duration: 500, useNativeDriver: true }),
+        ])
+      )
+    );
+    stagger.start();
+  }, [trigger]);
+
+  return anims;
+}
+
+// ─────────────────────────────────────────────────
+//  Main Onboarding
+// ─────────────────────────────────────────────────
 const OnboardingScreen = ({ onFinish }) => {
   const { isDarkMode } = useApp();
-  const [phase, setPhase] = useState('intro'); // 'intro' | 'slides'
+  const [phase, setPhase]             = useState('intro');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [transitioning, setTransitioning] = useState(false);
 
-  const fadeAnim  = useRef(new Animated.Value(1)).current;
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  const smokeAnim = useRef(new Animated.Value(1)).current;
+  // Slide panel animation
+  const slideX = useRef(new Animated.Value(0)).current;
+
+  // PPT stagger for each element
+  const staggerAnims = useStaggeredEntrance(currentIndex);
 
   const goToNext = () => {
-    Animated.parallel([
-      Animated.timing(fadeAnim,  { toValue: 0, duration: 350, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: -90, duration: 350, useNativeDriver: true }),
-      Animated.timing(smokeAnim, { toValue: 0, duration: 350, useNativeDriver: true }),
-    ]).start(() => {
+    if (transitioning) return;
+    setTransitioning(true);
+
+    // Slide panel left-out
+    Animated.timing(slideX, { toValue: -width, duration: 350, useNativeDriver: true }).start(() => {
       if (currentIndex < slides.length - 1) {
         setCurrentIndex(i => i + 1);
-        slideAnim.setValue(90);
-        Animated.parallel([
-          Animated.timing(fadeAnim,  { toValue: 1, duration: 450, useNativeDriver: true }),
-          Animated.timing(slideAnim, { toValue: 0, duration: 550, useNativeDriver: true }),
-          Animated.timing(smokeAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
-        ]).start();
+        slideX.setValue(width); // come from right
+        Animated.timing(slideX, { toValue: 0, duration: 400, useNativeDriver: true }).start(() =>
+          setTransitioning(false)
+        );
       } else {
         onFinish();
       }
@@ -188,96 +169,55 @@ const OnboardingScreen = ({ onFinish }) => {
   }
 
   const slide = slides[currentIndex];
-  const bg = isDarkMode ? '#0a0a0a' : '#fff8f0';
-  const textColor = isDarkMode ? '#ffffff' : '#111111';
-  const descColor = isDarkMode ? '#aaaaaa' : '#666666';
+  const bg = isDarkMode ? '#0d0d0d' : '#fff8f0';
+  const textCol = isDarkMode ? '#f5f5f5' : '#111111';
+  const descCol = isDarkMode ? '#aaaaaa' : '#555555';
+
+  // Helper: animated style per element
+  const staggerStyle = (index) => ({
+    opacity: staggerAnims[index],
+    transform: [{
+      translateY: staggerAnims[index].interpolate({
+        inputRange: [0, 1],
+        outputRange: [32, 0],
+      }),
+    }],
+  });
 
   return (
-    <View style={[styles.slidesWrap, { backgroundColor: bg }]}>
-      {/* Background gradient */}
+    <View style={[styles.wrap, { backgroundColor: bg }]}>
       <LinearGradient
-        colors={isDarkMode ? ['#0a0a0a', '#1a0800'] : ['#fff8f0', '#ffffff']}
+        colors={isDarkMode ? ['#0d0d0d', '#1c0800'] : ['#fff8f0', '#fffaf7']}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* ── Slide Content (animated) ── */}
-      <Animated.View
-        style={[
-          styles.slideContent,
-          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-        ]}
-      >
-        {/* Tag */}
-        <Animated.Text
-          style={[
-            styles.slideTag,
-            {
-              opacity: smokeAnim,
-              transform: [
-                {
-                  translateY: smokeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [8, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
+      {/* ── Slide Panel ── */}
+      <Animated.View style={[styles.slidePanel, { transform: [{ translateX: slideX }] }]}>
+
+        {/* Tag — PPT entrance item 1 */}
+        <Animated.Text style={[styles.tag, { color: slide.accent }, staggerStyle(0)]}>
           {slide.tag}
         </Animated.Text>
 
-        {/* Icon */}
-        <View style={styles.iconWrap}>
-          <OnboardingAnimation name={slide.animationKey} style={styles.animation} />
-        </View>
+        {/* Icon badge — PPT entrance item 2 */}
+        <Animated.View style={[styles.iconRow, staggerStyle(1)]}>
+          <OnboardingAnimation name={slide.animationKey} />
+        </Animated.View>
 
-        {/* Title */}
-        <Animated.Text
-          style={[
-            styles.slideTitle,
-            {
-              color: textColor,
-              opacity: smokeAnim,
-              transform: [
-                {
-                  translateY: smokeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [24, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
+        {/* Title — PPT entrance item 3 */}
+        <Animated.Text style={[styles.title, { color: textCol }, staggerStyle(2)]}>
           {slide.title}
         </Animated.Text>
 
-        {/* Description */}
-        <Animated.Text
-          style={[
-            styles.slideDesc,
-            {
-              color: descColor,
-              opacity: smokeAnim,
-              transform: [
-                {
-                  translateY: smokeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [36, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
+        {/* Description — PPT entrance item 4 */}
+        <Animated.Text style={[styles.desc, { color: descCol }, staggerStyle(3)]}>
           {slide.desc}
         </Animated.Text>
       </Animated.View>
 
       {/* ── Fixed Footer ── */}
       <View style={styles.footer}>
-        {/* Dots */}
+        {/* Progress dots */}
         <View style={styles.dotsRow}>
           {slides.map((_, i) => (
             <View
@@ -285,20 +225,22 @@ const OnboardingScreen = ({ onFinish }) => {
               style={[
                 styles.dot,
                 {
-                  backgroundColor:
-                    i === currentIndex ? '#FF6347' : 'rgba(180,180,180,0.25)',
-                  width: i === currentIndex ? 28 : 8,
+                  backgroundColor: i === currentIndex
+                    ? slide.accent
+                    : 'rgba(180,180,180,0.25)',
+                  width: i === currentIndex ? 32 : 8,
                 },
               ]}
             />
           ))}
         </View>
 
-        {/* Button */}
+        {/* CTA Button */}
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={goToNext}
-          style={styles.btnShadow}
+          disabled={transitioning}
+          style={styles.btnWrap}
         >
           <LinearGradient
             colors={['#FF8C00', '#FF4500']}
@@ -307,10 +249,24 @@ const OnboardingScreen = ({ onFinish }) => {
             style={styles.btn}
           >
             <Text style={styles.btnText}>
-              {currentIndex === slides.length - 1 ? 'Mulai Sekarang 🔥' : 'Lanjutkan →'}
+              {currentIndex === slides.length - 1 ? 'Mulai Sekarang' : 'Lanjutkan'}
             </Text>
+            {/* Custom arrow — no emoji */}
+            <View style={styles.arrowBox}>
+              <View style={styles.arrowLine} />
+              <View style={styles.arrowHead} />
+            </View>
           </LinearGradient>
         </TouchableOpacity>
+
+        {/* Skip */}
+        {currentIndex < slides.length - 1 && (
+          <TouchableOpacity onPress={onFinish} style={{ marginTop: 14 }}>
+            <Text style={{ color: 'rgba(180,180,180,0.6)', fontSize: 13, letterSpacing: 1 }}>
+              Lewati
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -318,93 +274,74 @@ const OnboardingScreen = ({ onFinish }) => {
 
 const styles = StyleSheet.create({
   // ── Intro ──
-  introWrap: {
-    flex: 1,
-    overflow: 'hidden',
-  },
   introCenter: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   introTitle: {
-    fontSize: 36,
+    fontSize: 38,
     fontWeight: '300',
-    color: '#ffffff',
+    color: '#fff',
     letterSpacing: 0.5,
   },
-  introBrand: {
+  introF: {
     fontWeight: '900',
-    fontSize: 40,
-  },
-  // Stacked text layers (like Monarch Bank reference)
-  introTitleLayer1: {
-    opacity: 0.15,
-    marginBottom: -36,  // stack on top of each other
-  },
-  introTitleLayer2: {
-    opacity: 0.4,
-  },
-  introTitleMain: {
-    opacity: 1,
-  },
-  introTitleAbs: {
-    marginTop: -36, // stack over previous
+    fontSize: 44,
   },
   introTagline: {
-    marginTop: 20,
+    marginTop: 56,   // enough space so it's below the stacked title
     fontSize: 12,
-    color: 'rgba(255,255,255,0.75)',
-    letterSpacing: 4,
+    color: 'rgba(255,255,255,0.7)',
+    letterSpacing: 5,
     textTransform: 'uppercase',
   },
 
   // ── Slides ──
-  slidesWrap: {
+  wrap: {
     flex: 1,
   },
-  slideContent: {
+  slidePanel: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 28,
-    paddingTop: height * 0.1,
+    justifyContent: 'center', // vertically centered
+    paddingHorizontal: 32,
+    paddingBottom: 20,       // small breathing room above footer
   },
-  slideTag: {
+  tag: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#FF6347',
     letterSpacing: 4,
     textTransform: 'uppercase',
-    marginBottom: 20,
+    marginBottom: 24,
+    textAlign: 'center',
   },
-  iconWrap: {
-    marginBottom: 28,
+  iconRow: {
+    marginBottom: 32,
+    alignItems: 'center',
   },
-  animation: {
-    width: width * 0.52,
-    height: width * 0.52,
-  },
-  slideTitle: {
+  title: {
     fontSize: 30,
     fontWeight: '900',
     textAlign: 'center',
-    lineHeight: 40,
-    marginBottom: 14,
+    lineHeight: 42,
+    marginBottom: 18,
     letterSpacing: -0.5,
   },
-  slideDesc: {
-    fontSize: 15,
+  desc: {
+    fontSize: 17,   // 17+ as requested
     textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 12,
+    lineHeight: 26,
+    paddingHorizontal: 8,
+    fontWeight: '400',
   },
 
-  // ── Footer (fixed below content) ──
+  // ── Footer ──
   footer: {
     alignItems: 'center',
-    paddingHorizontal: 28,
-    paddingBottom: Platform.OS === 'ios' ? 50 : 36,
-    paddingTop: 20,
+    paddingHorizontal: 32,
+    paddingBottom: Platform.OS === 'ios' ? 48 : 32,
+    paddingTop: 16,
   },
   dotsRow: {
     flexDirection: 'row',
@@ -416,27 +353,51 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
   },
-  btnShadow: {
-    width: width * 0.68,
-    maxWidth: 340,
+  btnWrap: {
+    width: width * 0.72,
+    maxWidth: 360,
     borderRadius: 50,
     overflow: 'hidden',
     elevation: 10,
     shadowColor: '#FF4500',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.45,
+    shadowOpacity: 0.4,
     shadowRadius: 16,
   },
   btn: {
-    paddingVertical: 16,
+    paddingVertical: 17,
+    paddingHorizontal: 28,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 12,
   },
   btnText: {
-    color: '#ffffff',
+    color: '#fff',
     fontSize: 15,
     fontWeight: '900',
     letterSpacing: 1,
+  },
+  // Custom arrow (replacing emoji →)
+  arrowBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 20,
+  },
+  arrowLine: {
+    flex: 1,
+    height: 2,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+  },
+  arrowHead: {
+    width: 0,
+    height: 0,
+    borderTopWidth: 5,
+    borderBottomWidth: 5,
+    borderLeftWidth: 6,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderLeftColor: 'rgba(255,255,255,0.85)',
   },
 });
 
