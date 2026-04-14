@@ -91,7 +91,7 @@ const PinCard = ({ item, theme, onAddToCart, onToggleFavorite, onPress, isFavori
           {/* Heart */}
           <Animated.View style={[styles.pinHeart, { transform: [{ scale: heartScale }] }]}>
             <TouchableOpacity onPress={handleFavorite} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={{ fontSize: 20 }}>{isFavorite ? '❤️' : '🤍'}</Text>
+              <Text style={{ fontSize: 20 }}>{isFavorite ? '🧡' : '🤍'}</Text>
             </TouchableOpacity>
           </Animated.View>
 
@@ -398,11 +398,11 @@ const MenuScreen = ({ navigation }) => {
                 </TouchableOpacity>
               ))}
               <TouchableOpacity
-                style={[styles.chip, { backgroundColor: theme.card }, showFavoritesOnly && { backgroundColor: '#e74c3c' }]}
+                style={[styles.chip, { backgroundColor: theme.card }, showFavoritesOnly && { backgroundColor: '#FF8C00' }]}
                 onPress={() => setShowFavoritesOnly(f => !f)}
               >
                 <Text style={[styles.chipTxt, { color: theme.textSecondary }, showFavoritesOnly && { color: '#fff' }]}>
-                  ❤️ Favorit
+                  🧡 Favorit
                 </Text>
               </TouchableOpacity>
             </ScrollView>
