@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Image, Modal,
-  ScrollView,
+  ScrollView, Platform,
   StyleSheet, Text,
   TextInput, TouchableOpacity, View
 } from 'react-native';
@@ -47,10 +47,32 @@ const FloatParticle = ({ onDone }) => {
 };
 
 // ─── Pin Card (Pinterest style) ───────────────────────────────
-const PinCard = ({ item, theme, onAddToCart, onToggleFavorite, onPress, isFavorite, tall }) => {
+const PinCard = ({ item, theme, onAddToCart, onToggleFavorite, onPress, isFavorite, tall, index }) => {
   const heartScale = useRef(new Animated.Value(1)).current;
   const cardScale  = useRef(new Animated.Value(1)).current;
+  // PPT Cascade Animation Values
+  const slideAnim  = useRef(new Animated.Value(100)).current; 
+  const fadeAnim   = useRef(new Animated.Value(0)).current;
+  
   const imgHeight  = tall ? 240 : 160;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        delay: index * 100, // Slide satu per satu (Stagger)
+        useNativeDriver: Platform.OS !== 'web'
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 6,
+        tension: 40,
+        delay: index * 100,
+        useNativeDriver: Platform.OS !== 'web'
+      })
+    ]).start();
+  }, [index]);
 
   const handleFavorite = (e) => {
     e.stopPropagation?.();
@@ -65,7 +87,7 @@ const PinCard = ({ item, theme, onAddToCart, onToggleFavorite, onPress, isFavori
   const handlePressOut = () => Animated.spring(cardScale, { toValue: 1,    friction: 4, useNativeDriver: false }).start();
 
   return (
-    <Animated.View style={[styles.pin, { backgroundColor: theme.card, transform: [{ scale: cardScale }] }]}>
+    <Animated.View style={[styles.pin, { backgroundColor: theme.card, opacity: fadeAnim, transform: [{ scale: cardScale }, { translateY: slideAnim }] }]}>
       <GlareHover
         borderRadius={18}
         glareOpacity={0.2}
@@ -139,6 +161,7 @@ const MasonryGrid = ({ data, theme, onAddToCart, onToggleFavorite, onPress, favo
           <PinCard
             key={item.id}
             item={item}
+            index={i}
             theme={theme}
             tall={i % 3 === 0}
             isFavorite={favorites.includes(item.id)}
@@ -155,6 +178,7 @@ const MasonryGrid = ({ data, theme, onAddToCart, onToggleFavorite, onPress, favo
           <PinCard
             key={item.id}
             item={item}
+            index={i}
             theme={theme}
             tall={i % 3 === 1}
             isFavorite={favorites.includes(item.id)}
