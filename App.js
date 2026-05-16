@@ -7,6 +7,17 @@ import { Platform, Text, View } from 'react-native';
 
 import { darkTheme, lightTheme } from './src/config/theme';
 import { AppProvider, useApp } from './src/context/AppContext';
+import { usePushNotifications } from './src/hooks/usePushNotifications';
+import * as Notifications from 'expo-notifications';
+
+// ── Notifikasi Layar Utama ──
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 // ── Screens ──
 import AIChatBubble from './src/components/AIChatBubble';
@@ -198,6 +209,9 @@ function AppContent() {
   const { session, authLoading, isDarkMode, notifications } = useApp();
   const theme = isDarkMode ? darkTheme : lightTheme;
   const toastRef = useRef(null);
+
+  // Mendaftarkan dan Menangani Token Push Notifikasi
+  const { expoPushToken } = usePushNotifications();
 
   // ── Toast Listener ──
   useEffect(() => {
