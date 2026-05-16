@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../config/supabase';
+import { sendOrderReceiptEmail } from '../services/emailService';
 
 const AppContext = createContext();
 
@@ -178,6 +179,10 @@ export const AppProvider = ({ children }) => {
     setOrderHistory(prev => [newOrder, ...prev]);
     setCart([]);
     addNotification('Pesanan berhasil dibuat!', 'success');
+    
+    // 🔥 Tembak Email Struk Asli ke Pelanggan secara Asinkronus (Tidak mengganggu laju aplikasi)
+    sendOrderReceiptEmail(newOrder, session.user.email);
+
     return { data: newOrder, error: null };
   };
 
